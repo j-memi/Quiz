@@ -1,8 +1,24 @@
 import tkinter as tk
+import json
 
 
 def show_frame(frame):
     frame.tkraise()
+
+
+def get_quiz():
+    try:
+        quiz_info = open("dependencies//quizzes.json", "r")
+        quiz_info = json.load(quiz_info)
+        quiz_info = quiz_info["Quizzes"]
+        quiz_list = []
+        for i in range(len(quiz_info)):
+            quiz_list.append(quiz_info[i]["title"])
+        return quiz_list
+    except FileNotFoundError:
+        print("File not found")
+        quiz_list = []
+        return quiz_list
 
 
 # Set up the main window
@@ -17,35 +33,27 @@ window.state("zoomed")
 # Set up different frames
 title_frame = tk.Frame(window, bg="white")
 load_quiz_frame = tk.Frame(window, bg="white")
+edit_quiz_frame = tk.Frame(window, bg="white")
 quiz_frame = tk.Frame(window, bg="white")
 
-for frame in (title_frame, load_quiz_frame, quiz_frame):
+for frame in (title_frame, load_quiz_frame, edit_quiz_frame, quiz_frame):
     frame.grid(row=0, column=0, sticky="nsew")
 
 # ---------- Code for Title Screen ----------
 welcome = tk.Frame(title_frame, bg="white")
-welcome.grid(
-    row=0,
-    column=0,
-    sticky="ew",
-    padx=18,
-    pady=100
-    )
-label = tk.Label(
+heading = tk.Label(
     master=welcome,
     text="Welcome!",
     font=("Helvetica", 32),
     bg="white"
 )
-label.pack()
-label = tk.Label(
+description = tk.Label(
     master=welcome,
     text="Create your own or load a quiz using the corresponding "
     "buttons below!",
     font=("Helvetica", 24),
     bg="white"
     )
-label.pack()
 buttons = tk.Frame(title_frame, bg="white")
 create_button = tk.Button(
     master=buttons,
@@ -56,9 +64,8 @@ create_button = tk.Button(
     bd=0, bg="lightblue",
     activebackground="#5391b0",
     font=("Helvetica", 40),
-    command=lambda: show_frame(load_quiz_frame)
+    command=lambda: show_frame(edit_quiz_frame)
 )
-create_button.grid(row=0, column=0, sticky="ew", padx=106, pady=50)
 load_button = tk.Button(
     master=buttons,
     text="Load Quiz",
@@ -71,6 +78,11 @@ load_button = tk.Button(
     font=("Helvetica", 40),
     command=lambda: show_frame(load_quiz_frame)
     )
+# Pack everything
+welcome.grid(row=0, column=0, sticky="ew", padx=18, pady=100)
+heading.pack()
+description.pack()
+create_button.grid(row=0, column=0, sticky="ew", padx=106, pady=50)
 load_button.grid(row=0, column=1, sticky="ew", padx=106, pady=50)
 buttons.grid(row=1, column=0, sticky="ew")
 
@@ -97,15 +109,10 @@ canvas_container.create_window(
     window=options,
     anchor="nw"
     )
-quiz_list = [
-    "This is a long quiz title. Testing text wrapping aaaaaa a a a a a a a a a"
-    " a a a a a a a  a a a a a a a aa a a a a a a a a a a a a a a a a a a a a",
-    "Quiz 2", "Caefaefaef", "JJJJJJJJJ",
-    "()(*^&^%&%$#%$&^*}::><>?))", "item6", "item7", "item8", "item9",
-    "item5", "item6", "item7", "item8", "item9",
-    "item5", "item6", "item7", "item8", "item9"
-          ]
-for item in quiz_list:
+# Getting quiz titles and creating buttons for list
+quiz_titles = get_quiz()
+for item in quiz_titles:
+    quiz_no = quiz_titles.index(item)
     button = tk.Button(
         master=options,
         text=item,
@@ -116,9 +123,10 @@ for item in quiz_list:
         activebackground="#5391b0",
         padx=50,
         width=87,
-        command=lambda: show_frame(quiz_frame)
+        # command=lambda: show_frame(quiz_frame)
         )
-    button.pack(expand="true")
+    button.grid(row=quiz_no, column=0, sticky="ew")
+# Pack everything
 options.update()
 canvas_container.configure(
     yscrollcommand=scrollbar.set,
@@ -127,7 +135,6 @@ canvas_container.configure(
 
 canvas_container.grid(row=1, column=0, sticky="ew")
 scrollbar.grid(row=1, column=1, sticky="ns")
-
 load_quiz_frame.grid(row=0, column=0)
 
 # Run mainloop

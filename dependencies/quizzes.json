@@ -1,0 +1,58 @@
+{
+	"Quizzes": [
+		
+		{
+			"title": "Quiz on Capital Cities",
+			"id": "1",
+			"questions": [
+				{
+					"question": "What is the capital of France?",
+					"options": [
+						"Paris",
+						"London",
+						"Berlin",
+						"Madrid"
+					],
+					"answer": "Paris"
+				},
+				{
+					"question": "What is the capital of Germany?",
+					"options": [
+						"Paris",
+						"London",
+						"Berlin",
+						"Madrid"
+					],
+					"answer": "Berlin"
+				}
+				]
+		},
+		{
+			"title": "Math Quiz!",
+			"id": "2",
+			"questions": [
+				{
+					"question": "10 + 9 = ?",
+					"options": [
+						"20",
+						"19",
+						"21",
+						"30"
+					],
+					"answer": "19"
+				},
+				{
+					"question": "2 + 2 = ?",
+					"options": [
+						"4",
+						"3",
+						"2",
+						"69"
+					],
+					"answer": "4"
+				}
+				]
+		}
+
+	]
+}
