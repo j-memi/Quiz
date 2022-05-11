@@ -52,6 +52,32 @@
 					"answer": "4"
 				}
 				]
+		},
+		{
+			"title": "Biggest boldest bravest brightest cheapest cleanest cleverest coldest dullest faintest fewest gentlest grandest greatest highest kindest loudest proudest purest quietest rarest richest ripest safest simplest smoothest strangest weirdest warmest quickest weirdest worst wittiest quizzes",
+			"id": "2",
+			"questions": [
+				{
+					"question": "10 + 9 = ?",
+					"options": [
+						"20",
+						"19",
+						"21",
+						"30"
+					],
+					"answer": "19"
+				},
+				{
+					"question": "2 + 2 = ?",
+					"options": [
+						"4",
+						"3",
+						"2",
+						"69"
+					],
+					"answer": "4"
+				}
+				]
 		}
 
 	]

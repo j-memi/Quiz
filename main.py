@@ -8,7 +8,7 @@ def show_frame(frame):
 
 def get_quiz():
     try:
-        quiz_info = open("dependencies//quizzs.json", "r")
+        quiz_info = open("dependencies//quizzes.json", "r")
         quiz_info = json.load(quiz_info)
         quiz_info = quiz_info["Quizzes"]
         quiz_list = []
@@ -29,7 +29,7 @@ def get_quiz():
 window = tk.Tk()
 window.title("Quiz")
 window.configure(background="white")
-window.minsize(width=1000, height=800)
+window.resizable(False, False)
 window.rowconfigure([0, 1], weight=1)
 window.columnconfigure(0, weight=1)
 window.state("zoomed")
@@ -118,11 +118,13 @@ else:
         master=load_quiz_frame,
         text="Choose a quiz!",
         font=("Helvetica", 32),
+        width=100,
         bg="white"
         )
-    heading.grid(row=0, column=0, padx=150, pady=100)
     # Quiz Selector
-    load_quiz_frame.grid_columnconfigure(0, weight=1)
+    load_quiz_frame.columnconfigure([0, 3], weight=5)
+    load_quiz_frame.columnconfigure(1, weight=100)
+    load_quiz_frame.columnconfigure(2, weight=1)
     canvas_container = tk.Canvas(load_quiz_frame, height=480)
     options = tk.Frame(canvas_container)
     scrollbar = tk.Scrollbar(
@@ -141,25 +143,41 @@ else:
         button = tk.Button(
             master=options,
             text=item,
-            wraplength=1394,
-            justify="left",
+            width=58,
+            wraplength=900,
             font=("Helvetica", 20),
             bg="lightblue",
-            activebackground="#5391b0",
-            padx=50,
-            width=87,
+            activebackground="#5391b0"
             # command=lambda: show_frame(quiz_frame)
             )
-        button.grid(row=quiz_no, column=0, sticky="ew")
-    # Pack everything
+        button.pack(fill="x")
     options.update()
     canvas_container.configure(
         yscrollcommand=scrollbar.set,
         scrollregion="0 0 0 %s" % options.winfo_height()
         )
-
-    canvas_container.grid(row=1, column=0, sticky="ew")
-    scrollbar.grid(row=1, column=1, sticky="ns")
+    # Back button
+    back_button = tk.Button(
+        master=load_quiz_frame,
+        text="Back",
+        width=18,
+        bd=0, bg="lightblue",
+        activebackground="#5391b0",
+        font=("Helvetica", 18),
+        command=lambda: show_frame(title_frame)
+    )
+    # Pack everything
+    spacer1 = tk.Label(load_quiz_frame, bg="white")
+    spacer2 = tk.Label(load_quiz_frame, bg="white")
+    spacer1.grid(row=0, column=0, sticky="ew", padx=180)
+    spacer2.grid(row=0, column=3, sticky="ew", padx=180)
+    heading.grid(row=0, column=1, columnspan=2, sticky="ew", pady=60)
+    canvas_container.grid(row=1, column=1, sticky="ew")
+    scrollbar.grid(row=1, column=2, sticky="ns")
+    back_button.grid(
+        row=2, column=1, columnspan=2,
+        sticky="ew", padx=200, pady=50
+        )
     load_quiz_frame.grid(row=0, column=0)
 
 # Run mainloop
