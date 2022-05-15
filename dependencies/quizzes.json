@@ -3,7 +3,6 @@
 		
 		{
 			"title": "Quiz on Capital Cities",
-			"id": "1",
 			"questions": [
 				{
 					"question": "What is the capital of France?",
@@ -29,7 +28,6 @@
 		},
 		{
 			"title": "Math Quiz!",
-			"id": "2",
 			"questions": [
 				{
 					"question": "10 + 9 = ?",
@@ -55,7 +53,6 @@
 		},
 		{
 			"title": "Biggest boldest bravest brightest cheapest cleanest cleverest coldest dullest faintest fewest gentlest grandest greatest highest kindest loudest proudest purest quietest rarest richest ripest safest simplest smoothest strangest weirdest warmest quickest weirdest worst wittiest quizzes",
-			"id": "2",
 			"questions": [
 				{
 					"question": "10 + 9 = ?",
