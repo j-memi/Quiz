@@ -2,8 +2,14 @@ import tkinter as tk
 import json
 import random
 
+global questions
+global choices
+global answers
+global score
+
 
 def show_frame(frame):
+    frame.grid(row=0, column=0, sticky="nsew")
     frame.tkraise()
 
 
@@ -27,10 +33,6 @@ def get_quizzes():
 
 
 def load_quiz(quiz_no):
-    global questions
-    global choices
-    global answers
-    global score
     questions = []
     options = []
     answers = []
@@ -53,9 +55,6 @@ def load_quiz(quiz_no):
                     questions.append(quiz_info[i]["questions"][j]["question"])
                     options.append(quiz_info[i]["questions"][j]["options"])
                     answers.append(quiz_info[i]["questions"][j]["answer"])
-        print(questions)
-        print(options)
-        print(answers)
         show_frame(quiz_info_frame)
     except FileNotFoundError:
         print("File not found")
@@ -68,12 +67,52 @@ def load_quiz(quiz_no):
         return quiz_list
 
 
+def check_answer(answer):
+    if answer == answers[0]:
+        score += 1
+        score_label.configure(text="Your Score: {}".format(score))
+        if answer == 1:
+            option1.configure(bg="green")
+        elif answer == 2:
+            option2.configure(bg="green")
+        elif answer == 3:
+            option3.configure(bg="green")
+        elif answer == 4:
+            option4.configure(bg="green")
+    else:
+        if answer == 1:
+            option1.configure(bg="red")
+        elif answer == 2:
+            option2.configure(bg="red")
+        elif answer == 3:
+            option3.configure(bg="red")
+        elif answer == 4:
+            option4.configure(bg="red")
+        if answers[0] == 1:
+            option1.configure(bg="green")
+        elif answers[0] == 2:
+            option2.configure(bg="green")
+        elif answers[0] == 3:
+            option3.configure(bg="green")
+        elif answers[0] == 4:
+            option4.configure(bg="green")
+
+
+def next_question():
+    pass
+
+
+def finish_quiz():
+    show_frame(finish_frame)
+    score_label.configure(text="Your Final Score is: {}!".format(score))
+
+
 # Set up the main window
 window = tk.Tk()
 window.title("Quiz")
 window.configure(background="white")
 window.resizable(False, False)
-window.rowconfigure([0, 1], weight=1)
+window.rowconfigure(0, weight=1)
 window.columnconfigure(0, weight=1)
 window.state("zoomed")
 
@@ -83,15 +122,7 @@ load_quiz_frame = tk.Frame(window, bg="white")
 edit_quiz_frame = tk.Frame(window, bg="white")
 quiz_info_frame = tk.Frame(window, bg="white")
 quiz_frame = tk.Frame(window, bg="white")
-
-for frame in (
-    title_frame,
-    load_quiz_frame,
-    edit_quiz_frame,
-    quiz_info_frame,
-    quiz_frame
-):
-    frame.grid(row=0, column=0, sticky="nsew")
+finish_frame = tk.Frame(window, bg="white")
 
 # ---------- Code for Title Screen ----------
 welcome = tk.Frame(title_frame, bg="white")
@@ -272,6 +303,114 @@ info_label.grid(row=1, column=1, sticky="ew", pady=60)
 start_button.grid(row=2, column=1, sticky="ew")
 back_button.grid(row=3, column=1, sticky="ew", pady=60)
 
+# ---------- Code for Quiz Screen ----------
+options_frame = tk.Frame(quiz_frame, bg="white")
+question_label = tk.Label(
+    master=quiz_frame,
+    text="question",
+    wraplength=1100,
+    font=("Helvetica", 32),
+    bg="white"
+)
+title_button = tk.Button(
+    master=quiz_frame,
+    text="Back to Title",
+    bd=0, bg="lightblue", activebackground="#5391b0",
+    font=("Helvetica", 18),
+    command=lambda: show_frame(title_frame)
+)
+finish_button = tk.Button(
+    master=quiz_frame,
+    text="Finish Quiz",
+    bd=0, bg="red", activebackground="#5391b0",
+    font=("Helvetica", 18),
+    command=lambda: finish_quiz()
+)
+option1 = tk.Button(
+    master=options_frame,
+    text="option1",
+    padx=315, pady=100,
+    bd=0, bg="lightblue", activebackground="#5391b0",
+    font=("Helvetica", 18),
+    command=lambda: check_answer(1)
+)
+option2 = tk.Button(
+    master=options_frame,
+    text="option2",
+    padx=315, pady=100,
+    bd=0, bg="lightblue", activebackground="#5391b0",
+    font=("Helvetica", 18),
+    command=lambda: check_answer(2)
+)
+option3 = tk.Button(
+    master=options_frame,
+    text="option3",
+    padx=315, pady=100,
+    bd=0, bg="lightblue", activebackground="#5391b0",
+    font=("Helvetica", 18),
+    command=lambda: check_answer(3)
+)
+option4 = tk.Button(
+    master=options_frame,
+    text="option4",
+    padx=315, pady=100,
+    bd=0, bg="lightblue", activebackground="#5391b0",
+    font=("Helvetica", 18),
+    command=lambda: check_answer(4)
+)
+score_label = tk.Label(
+    master=quiz_frame,
+    text="score",
+    wraplength=1100, width=45,
+    font=("Helvetica", 28),
+    bg="white"
+)
+skip_next_button = tk.Button(
+    master=quiz_frame,
+    text="Skip",
+    font=("Helvetica", 18),
+    bd=0, bg="lightblue", activebackground="#5391b0",
+    command=lambda: next_question()
+)
+
+# Pack everything
+# Options Frame
+left_spacer = tk.Label(options_frame, bg="white")
+left_spacer.grid(row=0, column=0, sticky="ew", padx=10)
+option1.grid(row=0, column=1, padx=10, pady=10)
+option3.grid(row=1, column=1, padx=10, pady=10)
+option2.grid(row=0, column=2, padx=10, pady=10)
+option4.grid(row=1, column=2, padx=10, pady=10)
+right_spacer = tk.Label(options_frame, bg="white")
+right_spacer.grid(row=0, column=3, sticky="ew", padx=10)
+# Main Quiz Frame
+title_button.grid(row=0, column=0, padx=50, pady=60)
+question_label.grid(row=0, column=1, columnspan=2, pady=60)
+finish_button.grid(row=0, column=3, padx=50, pady=60)
+options_frame.grid(row=1, column=0, columnspan=4)
+score_label.grid(row=2, column=1, columnspan=2, pady=50)
+skip_next_button.grid(row=2, column=3, padx=50, pady=60)
+spacer1 = tk.Label(quiz_frame)
+spacer1.grid(row=3, column=0, columnspan=4, padx=window.winfo_width()/2)
+
+# ---------- Code for Finish Screen ----------
+score_label = tk.Label(
+    master=finish_frame,
+    text="score",
+    wraplength=1100, width=45,
+    font=("Helvetica", 32),
+    bg="white"
+)
+title_button = tk.Button(
+    master=finish_frame,
+    text="Back to Title",
+    bd=0, bg="lightblue", activebackground="#5391b0",
+    font=("Helvetica", 18),
+    command=lambda: show_frame(title_frame)
+)
+# Pack everything
+title_button.grid(row=0, column=0, sticky="ew", pady=60, padx=20)
+score_label.grid(row=1, column=0, sticky="ew", pady=60)
 
 # Run mainloop
 if __name__ == "__main__":
