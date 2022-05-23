@@ -2,11 +2,6 @@ import tkinter as tk
 import json
 import random
 
-global questions
-global choices
-global answers
-global score
-
 
 def show_frame(frame):
     frame.grid(row=0, column=0, sticky="nsew")
@@ -33,6 +28,10 @@ def get_quizzes():
 
 
 def load_quiz(quiz_no):
+    global questions
+    global options
+    global answers
+    global score
     questions = []
     options = []
     answers = []
@@ -68,6 +67,11 @@ def load_quiz(quiz_no):
 
 
 def check_answer(answer):
+    global score
+    option1.configure(state="disabled")
+    option2.configure(state="disabled")
+    option3.configure(state="disabled")
+    option4.configure(state="disabled")
     if answer == answers[0]:
         score += 1
         score_label.configure(text="Your Score: {}".format(score))
@@ -96,10 +100,15 @@ def check_answer(answer):
             option3.configure(bg="green")
         elif answers[0] == 4:
             option4.configure(bg="green")
+    quiz_frame.update()
 
 
 def next_question():
-    pass
+    question_label.configure(text=questions[0])
+    option1.configure(text=options[0][0], state="normal")
+    option2.configure(text=options[0][1], state="normal")
+    option3.configure(text=options[0][2], state="normal")
+    option4.configure(text=options[0][3], state="normal")
 
 
 def finish_quiz():
@@ -110,36 +119,33 @@ def finish_quiz():
 # Set up the main window
 window = tk.Tk()
 window.title("Quiz")
-window.configure(background="white")
 window.resizable(False, False)
 window.rowconfigure(0, weight=1)
 window.columnconfigure(0, weight=1)
 window.state("zoomed")
 
 # Set up different frames
-title_frame = tk.Frame(window, bg="white")
-load_quiz_frame = tk.Frame(window, bg="white")
-edit_quiz_frame = tk.Frame(window, bg="white")
-quiz_info_frame = tk.Frame(window, bg="white")
-quiz_frame = tk.Frame(window, bg="white")
-finish_frame = tk.Frame(window, bg="white")
+title_frame = tk.Frame(window)
+load_quiz_frame = tk.Frame(window)
+edit_quiz_frame = tk.Frame(window)
+quiz_info_frame = tk.Frame(window)
+quiz_frame = tk.Frame(window)
+finish_frame = tk.Frame(window)
 
 # ---------- Code for Title Screen ----------
-welcome = tk.Frame(title_frame, bg="white")
+welcome = tk.Frame(title_frame)
 heading = tk.Label(
     master=welcome,
     text="Welcome!",
-    font=("Helvetica", 32),
-    bg="white"
+    font=("Helvetica", 32)
 )
 description = tk.Label(
     master=welcome,
     text="Create your own or load a quiz using the corresponding "
     "buttons below!",
-    font=("Helvetica", 24),
-    bg="white"
+    font=("Helvetica", 24)
     )
-buttons = tk.Frame(title_frame, bg="white")
+buttons = tk.Frame(title_frame)
 create_button = tk.Button(
     master=buttons,
     text="Create Quiz",
@@ -179,8 +185,7 @@ if len(quiz_titles) == 0:
     error_label = tk.Label(
         master=load_quiz_frame,
         text="Unable to load quiz.\nQuiz not found.",
-        font=("Helvetica", 32),
-        bg="white"
+        font=("Helvetica", 32)
         )
     back_button = tk.Button(
         master=load_quiz_frame,
@@ -200,8 +205,7 @@ else:
         master=load_quiz_frame,
         text="Choose a quiz!",
         font=("Helvetica", 32),
-        width=100,
-        bg="white"
+        width=100
         )
     # Quiz Selector
     load_quiz_frame.columnconfigure([0, 3], weight=5)
@@ -249,8 +253,8 @@ else:
         command=lambda: show_frame(title_frame)
     )
     # Pack everything
-    spacer1 = tk.Label(load_quiz_frame, bg="white")
-    spacer2 = tk.Label(load_quiz_frame, bg="white")
+    spacer1 = tk.Label(load_quiz_frame)
+    spacer2 = tk.Label(load_quiz_frame)
     spacer1.grid(row=0, column=0, sticky="ew", padx=180)
     spacer2.grid(row=0, column=3, sticky="ew", padx=180)
     heading.grid(row=0, column=1, columnspan=2, sticky="ew", pady=60)
@@ -267,15 +271,13 @@ title_label = tk.Label(
     master=quiz_info_frame,
     text="title",
     wraplength=1100, width=45,
-    font=("Helvetica", 32),
-    bg="white"
+    font=("Helvetica", 32)
 )
 info_label = tk.Label(
     master=quiz_info_frame,
     text="info",
     wraplength=1100, width=45,
-    font=("Helvetica", 24),
-    bg="white"
+    font=("Helvetica", 24)
 )
 start_button = tk.Button(
     master=quiz_info_frame,
@@ -283,7 +285,7 @@ start_button = tk.Button(
     bd=0,
     bg="lightblue", activebackground="#5391b0",
     font=("Helvetica", 18),
-    command=lambda: show_frame(quiz_frame)
+    command=lambda: [show_frame(quiz_frame), next_question()]
 )
 back_button = tk.Button(
     master=quiz_info_frame,
@@ -294,8 +296,8 @@ back_button = tk.Button(
     command=lambda: show_frame(load_quiz_frame)
 )
 # Pack everything
-spacer1 = tk.Label(quiz_info_frame, bg="white")
-spacer2 = tk.Label(quiz_info_frame, bg="white")
+spacer1 = tk.Label(quiz_info_frame)
+spacer2 = tk.Label(quiz_info_frame)
 spacer1.grid(row=0, column=0, sticky="ew", padx=100)
 spacer2.grid(row=0, column=2, sticky="ew", padx=100)
 title_label.grid(row=0, column=1, sticky="ew", pady=60)
@@ -304,23 +306,24 @@ start_button.grid(row=2, column=1, sticky="ew")
 back_button.grid(row=3, column=1, sticky="ew", pady=60)
 
 # ---------- Code for Quiz Screen ----------
-options_frame = tk.Frame(quiz_frame, bg="white")
+top_frame = tk.Frame(quiz_frame)
+options_frame = tk.Frame(quiz_frame)
+bottom_frame = tk.Frame(quiz_frame)
 question_label = tk.Label(
-    master=quiz_frame,
+    master=top_frame,
     text="question",
     wraplength=1100,
-    font=("Helvetica", 32),
-    bg="white"
+    font=("Helvetica", 32)
 )
 title_button = tk.Button(
-    master=quiz_frame,
+    master=top_frame,
     text="Back to Title",
     bd=0, bg="lightblue", activebackground="#5391b0",
     font=("Helvetica", 18),
     command=lambda: show_frame(title_frame)
 )
 finish_button = tk.Button(
-    master=quiz_frame,
+    master=top_frame,
     text="Finish Quiz",
     bd=0, bg="red", activebackground="#5391b0",
     font=("Helvetica", 18),
@@ -328,42 +331,37 @@ finish_button = tk.Button(
 )
 option1 = tk.Button(
     master=options_frame,
-    text="option1",
-    padx=315, pady=100,
+    text="option1", anchor="center",
     bd=0, bg="lightblue", activebackground="#5391b0",
     font=("Helvetica", 18),
     command=lambda: check_answer(1)
 )
 option2 = tk.Button(
     master=options_frame,
-    text="option2",
-    padx=315, pady=100,
+    text="option2", anchor="center",
     bd=0, bg="lightblue", activebackground="#5391b0",
     font=("Helvetica", 18),
     command=lambda: check_answer(2)
 )
 option3 = tk.Button(
     master=options_frame,
-    text="option3",
-    padx=315, pady=100,
+    text="option3", anchor="center",
     bd=0, bg="lightblue", activebackground="#5391b0",
     font=("Helvetica", 18),
     command=lambda: check_answer(3)
 )
 option4 = tk.Button(
     master=options_frame,
-    text="option4",
-    padx=315, pady=100,
+    text="option4", anchor="center",
     bd=0, bg="lightblue", activebackground="#5391b0",
     font=("Helvetica", 18),
     command=lambda: check_answer(4)
 )
 score_label = tk.Label(
-    master=quiz_frame,
+    master=bottom_frame,
     text="score",
     wraplength=1100, width=45,
-    font=("Helvetica", 28),
-    bg="white"
+    font=("Helvetica", 28)
 )
 skip_next_button = tk.Button(
     master=quiz_frame,
@@ -374,32 +372,32 @@ skip_next_button = tk.Button(
 )
 
 # Pack everything
-# Options Frame
-left_spacer = tk.Label(options_frame, bg="white")
-left_spacer.grid(row=0, column=0, sticky="ew", padx=10)
-option1.grid(row=0, column=1, padx=10, pady=10)
-option3.grid(row=1, column=1, padx=10, pady=10)
-option2.grid(row=0, column=2, padx=10, pady=10)
-option4.grid(row=1, column=2, padx=10, pady=10)
-right_spacer = tk.Label(options_frame, bg="white")
-right_spacer.grid(row=0, column=3, sticky="ew", padx=10)
-# Main Quiz Frame
-title_button.grid(row=0, column=0, padx=50, pady=60)
-question_label.grid(row=0, column=1, columnspan=2, pady=60)
-finish_button.grid(row=0, column=3, padx=50, pady=60)
-options_frame.grid(row=1, column=0, columnspan=4)
-score_label.grid(row=2, column=1, columnspan=2, pady=50)
-skip_next_button.grid(row=2, column=3, padx=50, pady=60)
-spacer1 = tk.Label(quiz_frame)
-spacer1.grid(row=3, column=0, columnspan=4, padx=window.winfo_width()/2)
+top_frame.columnconfigure([0, 2], weight=1)
+top_frame.columnconfigure(1, weight=30)
+options_frame.columnconfigure([0, 1], weight=1, uniform="options")
+options_frame.rowconfigure([0, 1], weight=1)
+bottom_frame.columnconfigure(0, weight=1)
+
+title_button.grid(row=0, column=0, sticky="ew", padx=20, pady=80)
+question_label.grid(row=0, column=1, sticky="ew")
+finish_button.grid(row=0, column=2, sticky="ew", padx=20)
+option1.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+option2.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
+option3.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+option4.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
+score_label.grid(row=0, column=0, sticky="ew", pady=50)
+skip_next_button.place(x=1370, y=745)
+top_frame.pack(side="top", fill="x", padx=20)
+options_frame.pack(fill="both", expand=True, padx=15)
+bottom_frame.pack(fill="x", padx=20)
 
 # ---------- Code for Finish Screen ----------
+finish_frame.columnconfigure(0, weight=1)
 score_label = tk.Label(
     master=finish_frame,
     text="score",
     wraplength=1100, width=45,
     font=("Helvetica", 32),
-    bg="white"
 )
 title_button = tk.Button(
     master=finish_frame,
