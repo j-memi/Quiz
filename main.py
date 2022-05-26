@@ -48,12 +48,21 @@ def load_quiz(quiz_no):
                 info_label.configure(
                     text="{} questions".format(len(quiz_info[i]["questions"]))
                 )
-                # questions and options in random order
+                # questions in random order
                 random.shuffle(quiz_info[i]["questions"])
+                # For each question shuffle options and append to the lists
                 for j in range(len(quiz_info[i]["questions"])):
+                    answer = (
+                        quiz_info[i]["questions"][j]["options"]
+                        [quiz_info[i]["questions"][j]["answer"]]
+                    )
+                    random.shuffle(quiz_info[i]["questions"][j]["options"])
+                    answer = (
+                        quiz_info[i]["questions"][j]["options"].index(answer)
+                        )
                     questions.append(quiz_info[i]["questions"][j]["question"])
                     options.append(quiz_info[i]["questions"][j]["options"])
-                    answers.append(quiz_info[i]["questions"][j]["answer"])
+                    answers.append(answer)
         show_frame(quiz_info_frame)
     except FileNotFoundError:
         print("File not found")
@@ -72,48 +81,67 @@ def check_answer(answer):
     option2.configure(state="disabled")
     option3.configure(state="disabled")
     option4.configure(state="disabled")
+    skip_next_button.configure(text="Next")
     if answer == answers[0]:
         score += 1
-        score_label.configure(text="Your Score: {}".format(score))
-        if answer == 1:
+        if answer == 0:
             option1.configure(bg="green")
-        elif answer == 2:
+        elif answer == 1:
             option2.configure(bg="green")
-        elif answer == 3:
+        elif answer == 2:
             option3.configure(bg="green")
-        elif answer == 4:
+        elif answer == 3:
             option4.configure(bg="green")
     else:
-        if answer == 1:
+        if answer == 0:
             option1.configure(bg="red")
-        elif answer == 2:
+        elif answer == 1:
             option2.configure(bg="red")
-        elif answer == 3:
+        elif answer == 2:
             option3.configure(bg="red")
-        elif answer == 4:
+        elif answer == 3:
             option4.configure(bg="red")
-        if answers[0] == 1:
+        if answers[0] == 0:
             option1.configure(bg="green")
-        elif answers[0] == 2:
+        elif answers[0] == 1:
             option2.configure(bg="green")
-        elif answers[0] == 3:
+        elif answers[0] == 2:
             option3.configure(bg="green")
-        elif answers[0] == 4:
+        elif answers[0] == 3:
             option4.configure(bg="green")
+    score_label.configure(text="Your Score: {}".format(score))
     quiz_frame.update()
 
 
-def next_question():
+def start_quiz():
+    show_frame(quiz_frame)
     question_label.configure(text=questions[0])
-    option1.configure(text=options[0][0], state="normal")
-    option2.configure(text=options[0][1], state="normal")
-    option3.configure(text=options[0][2], state="normal")
-    option4.configure(text=options[0][3], state="normal")
+    option1.configure(text=options[0][0], bg="lightblue", state="normal")
+    option2.configure(text=options[0][1], bg="lightblue", state="normal")
+    option3.configure(text=options[0][2], bg="lightblue", state="normal")
+    option4.configure(text=options[0][3], bg="lightblue", state="normal")
+    skip_next_button.configure(text="Skip")
+    score_label.configure(text="Your Score: {}".format(score))
+
+
+def next_question():
+    try:
+        questions.pop(0)
+        answers.pop(0)
+        options.pop(0)
+        question_label.configure(text=questions[0])
+        option1.configure(text=options[0][0], bg="lightblue", state="normal")
+        option2.configure(text=options[0][1], bg="lightblue", state="normal")
+        option3.configure(text=options[0][2], bg="lightblue", state="normal")
+        option4.configure(text=options[0][3], bg="lightblue", state="normal")
+        skip_next_button.configure(text="Skip")
+    except IndexError:
+        finish_quiz()
 
 
 def finish_quiz():
     show_frame(finish_frame)
-    score_label.configure(text="Your Final Score is: {}!".format(score))
+    final_score_label.configure(text="Your Final Score is: {}!".format(score))
 
 
 # Set up the main window
@@ -285,7 +313,7 @@ start_button = tk.Button(
     bd=0,
     bg="lightblue", activebackground="#5391b0",
     font=("Helvetica", 18),
-    command=lambda: [show_frame(quiz_frame), next_question()]
+    command=lambda: start_quiz()
 )
 back_button = tk.Button(
     master=quiz_info_frame,
@@ -334,32 +362,32 @@ option1 = tk.Button(
     text="option1", anchor="center",
     bd=0, bg="lightblue", activebackground="#5391b0",
     font=("Helvetica", 18),
-    command=lambda: check_answer(1)
+    command=lambda: check_answer(0)
 )
 option2 = tk.Button(
     master=options_frame,
     text="option2", anchor="center",
     bd=0, bg="lightblue", activebackground="#5391b0",
     font=("Helvetica", 18),
-    command=lambda: check_answer(2)
+    command=lambda: check_answer(1)
 )
 option3 = tk.Button(
     master=options_frame,
     text="option3", anchor="center",
     bd=0, bg="lightblue", activebackground="#5391b0",
     font=("Helvetica", 18),
-    command=lambda: check_answer(3)
+    command=lambda: check_answer(2)
 )
 option4 = tk.Button(
     master=options_frame,
     text="option4", anchor="center",
     bd=0, bg="lightblue", activebackground="#5391b0",
     font=("Helvetica", 18),
-    command=lambda: check_answer(4)
+    command=lambda: check_answer(3)
 )
 score_label = tk.Label(
     master=bottom_frame,
-    text="score",
+    text="Your score: 0",
     wraplength=1100, width=45,
     font=("Helvetica", 28)
 )
@@ -393,7 +421,7 @@ bottom_frame.pack(fill="x", padx=20)
 
 # ---------- Code for Finish Screen ----------
 finish_frame.columnconfigure(0, weight=1)
-score_label = tk.Label(
+final_score_label = tk.Label(
     master=finish_frame,
     text="score",
     wraplength=1100, width=45,
@@ -407,8 +435,27 @@ title_button = tk.Button(
     command=lambda: show_frame(title_frame)
 )
 # Pack everything
-title_button.grid(row=0, column=0, sticky="ew", pady=60, padx=20)
-score_label.grid(row=1, column=0, sticky="ew", pady=60)
+final_score_label.grid(row=0, column=0, sticky="ew", pady=60)
+title_button.grid(row=1, column=0, sticky="ew", pady=60, padx=20)
+
+# ---------- Code for Edit Quiz Screen ----------
+edit_quiz_frame.columnconfigure(0, weight=1)
+unavailable_label = tk.Label(
+    master=edit_quiz_frame,
+    text="Sorry this feature is unavailable right now. Look out for updates!",
+    wraplength=1100, width=45,
+    font=("Helvetica", 32),
+)
+title_button = tk.Button(
+    master=edit_quiz_frame,
+    text="Back to Title",
+    bd=0, bg="lightblue", activebackground="#5391b0",
+    font=("Helvetica", 18),
+    command=lambda: show_frame(title_frame)
+)
+# Pack everything
+unavailable_label.grid(row=0, column=0, sticky="ew", pady=60)
+title_button.grid(row=1, column=0, sticky="ew", pady=60, padx=20)
 
 # Run mainloop
 if __name__ == "__main__":
