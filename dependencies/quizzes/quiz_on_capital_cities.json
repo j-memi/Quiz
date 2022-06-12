@@ -1,0 +1,25 @@
+{
+	"title": "Quiz on Capital Cities",
+	"questions": [
+		{
+			"question": "What is the capital of France?",
+			"options": [
+				"Paris",
+				"London",
+				"Berlin",
+				"Madrid"
+			],
+			"answer": 0
+		},
+		{
+			"question": "What is the capital of Germany?",
+			"options": [
+				"Paris",
+				"London",
+				"Berlin",
+				"Madrid"
+			],
+			"answer": 2
+		}
+		]
+}

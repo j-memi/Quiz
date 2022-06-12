@@ -1,0 +1,25 @@
+{
+	"title": "Math Quiz!",
+	"questions": [
+		{
+			"question": "10 + 9 = ?",
+			"options": [
+				"20",
+				"19",
+				"21",
+				"30"
+			],
+			"answer": 1
+		},
+		{
+			"question": "2 + 2 = ?",
+			"options": [
+				"4",
+				"3",
+				"2",
+				"69"
+			],
+			"answer": 0
+		}
+		]
+}
