@@ -32,7 +32,7 @@ class quiz_app(tk.Tk):
             load_quiz_frame,
             create_edit_quiz_frame,
             create_quiz_frame,
-            # edit_quiz_frame,
+            edit_quiz_frame,
             # delete_quiz_frame,
             quiz_info_frame,
             quiz_frame,
@@ -580,7 +580,10 @@ class create_edit_quiz_frame(tk.Frame):
             bd=0, bg=style.GREEN_BUTTON, activebackground=style.ACTIVE_GREEN,
             font=(style.DEFAULT_FONT, 24),
             width=20,
-            command=lambda: controller.show_frame(create_quiz_frame)
+            command=lambda: [
+                controller.show_frame(create_quiz_frame),
+                create_quiz_frame.title_entry.delete(0, tk.END)
+            ]
         )
         edit_button = tk.Button(
             master=buttons_frame,
@@ -617,18 +620,35 @@ class create_quiz_frame(tk.Frame):
         self.columnconfigure(
             [0, 1, 2, 3], weight=1, uniform="create_quiz"
             )
-        self.rowconfigure(0, weight=1)
+        self.rowconfigure([0, 1, 2], weight=1)
 
+        # Tkinter Widgets
+        heading_label = tk.Label(
+            self, text="Create a new quiz", font=(style.DEFAULT_FONT, 32),
+            bg=style.BACKGROUND_COLOR
+        )
+        instructions_label = tk.Label(
+            self,
+            text=(
+                "Maximum of 30 characters\nThe title cannot be empty\n"
+                "THE TITLE CANNOT BE CHANGED LATER"
+                ),
+            font=(style.DEFAULT_FONT, 18), justify="center",
+            bg=style.BACKGROUND_COLOR
+        )
         input_title_label = tk.Label(
             self,
             text="Quiz Title:",
             font=(style.DEFAULT_FONT, 18),
             bg=style.BACKGROUND_COLOR
         )
-        self.title_entry = tk.Entry(
+        create_quiz_frame.title_entry = tk.Entry(
             self,
             font=(style.DEFAULT_FONT, 18),
             state="normal"
+        )
+        self.title_entry.bind(
+            "<Return>", lambda event: self.create_quiz(controller)
         )
         self.submit_button = tk.Button(
             self,
@@ -636,32 +656,31 @@ class create_quiz_frame(tk.Frame):
             text="Submit",
             bd=0, bg=style.GREEN_BUTTON, activebackground=style.ACTIVE_GREEN,
             state="normal",
-            command=lambda: self.create_quiz()
+            command=lambda: self.create_quiz(controller)
         )
-        back_button = tk.Button(
+        self.back_button = tk.Button(
             self,
             text="Back",
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 18),
-            command=lambda: [
-                controller.show_frame(create_edit_quiz_frame),
-                self.title_entry.delete(0, "end")
-                ]
+            command=lambda: controller.show_frame(create_edit_quiz_frame)
         )
 
         # Pack everything
-        input_title_label.grid(row=0, column=0, sticky="ew", padx=20, pady=20)
-        self.title_entry.grid(
-            row=0, column=1, columnspan=2, sticky="ew", padx=20, pady=20
+        heading_label.grid(row=0, column=0, columnspan=4, sticky="ew", pady=20)
+        instructions_label.grid(row=1, column=1, columnspan=2, sticky="ew")
+        input_title_label.grid(row=2, column=0, sticky="ew", padx=20, pady=20)
+        create_quiz_frame.title_entry.grid(
+            row=2, column=1, columnspan=2, sticky="ew", padx=20, pady=20
             )
         self.submit_button.grid(
-            row=1, column=1, columnspan=2, sticky="ew", padx=20, pady=20
+            row=3, column=1, columnspan=2, sticky="ew", padx=20, pady=20
             )
-        back_button.grid(
-            row=2, column=0, columnspan=4, sticky="ew", padx=50, pady=50
+        self.back_button.grid(
+            row=4, column=0, columnspan=4, sticky="ew", padx=50, pady=50
             )
 
-    def create_quiz(self):
+    def create_quiz(self, controller):
         # Get the title from user from the title entry box
         title = self.title_entry.get().lower().replace(" ", "_")
         try:
@@ -669,27 +688,35 @@ class create_quiz_frame(tk.Frame):
             open(
                 "dependencies//quizzes//{title}.json".format(title=title), "x"
             )
+            edit_quiz_frame.edit_quiz(self, title, controller)
         except FileExistsError:
             # Show error message if file already exists with buttons to
             # overwrite or edit the quiz with the same name
-            self.title_entry.configure(state="disabled")
+            create_quiz_frame.title_entry.configure(state="disabled")
             self.submit_button.configure(state="disabled")
-            error_label = tk.Label(
+            self.back_button.configure(state="disabled")
+            self.error_label = tk.Label(
                 text="Quiz with this title already exists.",
                 font=(style.DEFAULT_FONT, 40),
                 bg=style.RED_BUTTON,
             )
             # Edits the existing quiz without creating new quiz
-            edit_quiz_button = tk.Button(
+            self.edit_quiz_button = tk.Button(
                 text="Edit the quiz",
                 font=(style.DEFAULT_FONT, 18),
                 width=15,
                 bd=0, bg=style.GREEN_BUTTON,
                 padx=10, pady=10,
-                command=lambda: edit_quiz(title)
+                command=lambda: [
+                    edit_quiz_frame.edit_quiz(
+                        edit_quiz_frame, title, controller
+                        ),
+                    self.destroy_error_label(),
+                    controller.show_frame(edit_quiz_frame)
+                ]
             )
             # Delete and create new quiz with same name
-            overwrite_quiz_button = tk.Button(
+            self.overwrite_quiz_button = tk.Button(
                 text="Overwrite the quiz",
                 font=(style.DEFAULT_FONT, 18),
                 width=15,
@@ -697,38 +724,204 @@ class create_quiz_frame(tk.Frame):
                 padx=10, pady=10,
                 command=lambda: [
                     os.remove(
-                        "dependencie//quizzes//{title}.json"
+                        "dependencies//quizzes//{title}.json"
                         .format(title=title)
                         ),
-                    open(
-                        "dependencies//quizzes//{title}.json"
-                        .format(title=title),
-                        "x"
+                    self.create_quiz(controller),
+                    self.destroy_error_label(),
+                    edit_quiz_frame.edit_quiz(
+                        edit_quiz_frame, title, controller
                         ),
-                    edit_quiz(title)
+                    controller.show_frame(edit_quiz_frame)
                 ]
             )
             # Removes error label and allows user to enter new title
-            cancel_button = tk.Button(
+            self.cancel_button = tk.Button(
                 text="Cancel",
                 font=(style.DEFAULT_FONT, 18),
                 width=15,
                 bd=0, bg=style.BLUE_BUTTON,
                 padx=10, pady=10,
-                command=lambda: [
-                    error_label.destroy(),
-                    edit_quiz_button.destroy(),
-                    overwrite_quiz_button.destroy(),
-                    cancel_button.destroy(),
-                    self.title_entry.configure(state="normal"),
-                    self.submit_button.configure(state="normal")
-                ]
+                command=lambda: self.destroy_error_label()
             )
             # Pack error label and buttons
-            error_label.place(relx=0.5, rely=0.5, anchor="center")
-            edit_quiz_button.place(relx=0.3, rely=0.6, anchor="center")
-            overwrite_quiz_button.place(relx=0.5, rely=0.6, anchor="center")
-            cancel_button.place(relx=0.7, rely=0.6, anchor="center")
+            self.error_label.place(relx=0.5, rely=0.5, anchor="center")
+            self.edit_quiz_button.place(relx=0.3, rely=0.6, anchor="center")
+            self.overwrite_quiz_button.place(
+                relx=0.5, rely=0.6, anchor="center"
+                )
+            self.cancel_button.place(relx=0.7, rely=0.6, anchor="center")
+
+    def destroy_error_label(self):
+        self.error_label.destroy()
+        self.edit_quiz_button.destroy()
+        self.overwrite_quiz_button.destroy()
+        self.cancel_button.destroy()
+        self.title_entry.configure(state="normal")
+        self.submit_button.configure(state="normal")
+        self.back_button.configure(state="normal")
+
+
+# ---------- Code for Edit Quiz Screen ----------
+class edit_quiz_frame(tk.Frame):
+    question_no = 0
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.configure(bg=style.BACKGROUND_COLOR)
+        self.columnconfigure(
+            [0, 1, 2, 3], uniform="edit_quiz"
+            )
+        self.columnconfigure([0, 3], weight=1)
+        self.columnconfigure([1, 2], weight=2)
+        self.rowconfigure([0, 1, 2, 3, 4], weight=1)
+        # Page layout
+        text_attributes = {
+            "font": f"{style.DEFAULT_FONT} 18",
+            "justify": "center"
+            }
+        self.back_button = tk.Button(
+            self,
+            text="Back",
+            font=(style.DEFAULT_FONT, 18),
+            bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
+            command=lambda: controller.show_frame(create_edit_quiz_frame)
+        )
+        edit_quiz_frame.question_label = tk.Label(
+            self, bg=style.BACKGROUND_COLOR, **text_attributes
+        )
+        edit_quiz_frame.question_entry = tk.Entry(self, **text_attributes)
+        edit_quiz_frame.question_entry.insert(0, "Enter question here")
+        edit_quiz_frame.option1_entry = tk.Entry(self, **text_attributes)
+        edit_quiz_frame.option1_entry.insert(0, "Enter option 1 here")
+        edit_quiz_frame.option2_entry = tk.Entry(self, **text_attributes)
+        edit_quiz_frame.option2_entry.insert(0, "Enter option 2 here")
+        edit_quiz_frame.option3_entry = tk.Entry(self, **text_attributes)
+        edit_quiz_frame.option3_entry.insert(0, "Enter option 3 here")
+        edit_quiz_frame.option4_entry = tk.Entry(self, **text_attributes)
+        edit_quiz_frame.option4_entry.insert(0, "Enter option 4 here")
+        edit_quiz_frame.correct_option_entry = tk.Entry(
+            self, **text_attributes
+            )
+        edit_quiz_frame.correct_option_entry.insert(
+            0, "Enter correct option here. 1, 2, 3, 4"
+            )
+        self.correct_label = tk.Label(
+            self,
+            text="Correct option box:\n1, 2, 3 or 4",
+            **text_attributes,
+            bg=style.BACKGROUND_COLOR
+        )
+        self.option1_label = tk.Label(
+            self, text="Option 1 box -",
+            **text_attributes, bg=style.BACKGROUND_COLOR
+        )
+        self.option2_label = tk.Label(
+            self, text="- Option 2 box",
+            **text_attributes, bg=style.BACKGROUND_COLOR
+        )
+        self.option3_label = tk.Label(
+            self, text="Option 3 box -",
+            **text_attributes, bg=style.BACKGROUND_COLOR
+        )
+        self.option4_label = tk.Label(
+            self, text="- Option 4 box",
+            **text_attributes, bg=style.BACKGROUND_COLOR
+        )
+        edit_quiz_frame.save_button = tk.Button(
+            self,
+            text="Save",
+            **text_attributes,
+            bd=0, bg=style.GREEN_BUTTON,
+            activebackground=style.ACTIVE_GREEN,
+            command=lambda: self.submit_question()
+        )
+        edit_quiz_frame.next_button = tk.Button(
+            self, text="Next Question", **text_attributes,
+            command=lambda: self.show_question(self.question_no+1)
+        )
+        edit_quiz_frame.previous_button = tk.Button(
+            self, text="Previous Question", **text_attributes,
+            command=lambda: self.show_question(self.question_no-1)
+        )
+        # Pack everything
+        self.back_button.grid(row=0, column=0, sticky="ew", padx=20, pady=20)
+        edit_quiz_frame.question_entry.grid(
+            row=0, column=1, columnspan=2, sticky="nsew", padx=10, pady=20
+            )
+        edit_quiz_frame.question_label.grid(
+            row=0, column=3, sticky="ew", padx=20, pady=20
+            )
+        self.option1_label.grid(row=1, column=0, sticky="ew")
+        self.option2_label.grid(row=1, column=3, sticky="ew")
+        self.option3_label.grid(row=2, column=0, sticky="ew")
+        self.option4_label.grid(row=2, column=3, sticky="ew")
+        edit_quiz_frame.option1_entry.grid(
+            row=1, column=1, sticky="nsew", padx=3, pady=3
+            )
+        edit_quiz_frame.option2_entry.grid(
+            row=1, column=2, sticky="nsew", padx=3, pady=3
+            )
+        edit_quiz_frame.option3_entry.grid(
+            row=2, column=1, sticky="nsew", padx=3, pady=3
+            )
+        edit_quiz_frame.option4_entry.grid(
+            row=2, column=2, sticky="nsew", padx=3, pady=3
+            )
+        edit_quiz_frame.correct_option_entry.grid(
+            row=3, column=1, columnspan=2, sticky="nsew", padx=3, pady=3
+        )
+        edit_quiz_frame.save_button.grid(
+            row=4, column=1, columnspan=2, sticky="ew"
+            )
+        self.correct_label.grid(row=3, column=0, sticky="ew", padx=20, pady=20)
+        edit_quiz_frame.next_button.grid(row=4, column=3, sticky="ew")
+        edit_quiz_frame.previous_button.grid(row=4, column=0, sticky="ew")
+
+    def edit_quiz(self, title, controller):
+        global questions, options, answers
+        # Loads selected quiz
+        quiz_list = quiz_app.get_quizzes()
+        quiz_no = quiz_list.index("{title}.json".format(title=title))
+        load_quiz_frame.load_quiz(
+            load_quiz_frame,
+            quiz_no,
+            controller
+            )
+        self.show_question(self, self.question_no)
+
+        print(questions)
+        print(options)
+        print(answers)
+
+    def show_question(self, question_no):
+        # Change class variable to the passed in argument question_no
+        self.question_no = question_no
+        # Show the corresponding question and options
+        edit_quiz_frame.question_label.configure(
+            text="Question {question_no}".format(question_no=question_no+1)
+            )
+        edit_quiz_frame.question_entry.delete(0, "end")
+        edit_quiz_frame.question_entry.insert(0, questions[question_no])
+        edit_quiz_frame.option1_entry.delete(0, "end")
+        edit_quiz_frame.option1_entry.insert(0, options[question_no][0])
+        edit_quiz_frame.option2_entry.delete(0, "end")
+        edit_quiz_frame.option2_entry.insert(0, options[question_no][1])
+        edit_quiz_frame.option3_entry.delete(0, "end")
+        edit_quiz_frame.option3_entry.insert(0, options[question_no][2])
+        edit_quiz_frame.option4_entry.delete(0, "end")
+        edit_quiz_frame.option4_entry.insert(0, options[question_no][3])
+        edit_quiz_frame.correct_option_entry.delete(0, "end")
+        edit_quiz_frame.correct_option_entry.insert(0, answers[question_no]+1)
+        # Disable previous and next buttons if at the start or end of the quiz
+        if question_no == 0:
+            edit_quiz_frame.previous_button.configure(state="disabled")
+        else:
+            edit_quiz_frame.previous_button.configure(state="normal")
+        if question_no == len(questions)-1:
+            edit_quiz_frame.next_button.configure(state="disabled")
+        else:
+            edit_quiz_frame.next_button.configure(state="normal")
 
 
 # Run mainloop
