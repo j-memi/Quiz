@@ -22,14 +22,14 @@
 			"answer": 0
 		},
 		{
-			"question": "!@#$%^&*()ඞ?",
+			"question": "!@#$%^&*()\u0d9e?",
 			"options": [
 				"when imposter is sus",
-				"Sussy Baka",
-				"ඞ",
+				"\u0d9e",
+				"when imposter is not sus",
 				"69"
 			],
-			"answer": 2
+			"answer": 1
 		}
 		]
 }

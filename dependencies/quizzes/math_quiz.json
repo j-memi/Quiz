@@ -1,25 +1,25 @@
 {
-	"title": "math quiz",
-	"questions": [
-		{
-			"question": "10 + 9 = ?",
-			"options": [
-				"20",
-				"19",
-				"21",
-				"30"
-			],
-			"answer": 1
-		},
-		{
-			"question": "2 + 2 = ?",
-			"options": [
-				"4",
-				"3",
-				"2",
-				"69"
-			],
-			"answer": 0
-		}
-		]
+    "title": "math quiz",
+    "questions": [
+        {
+            "question": "10 + 9 = ?",
+            "options": [
+                "21",
+                "20",
+                "30",
+                "19"
+            ],
+            "answer": 3
+        },
+        {
+            "question": "2 + 2 = ?",
+            "options": [
+                "6",
+                "4",
+                "2",
+                "3"
+            ],
+            "answer": 1
+        }
+    ]
 }

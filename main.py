@@ -111,7 +111,8 @@ class title_frame(tk.Frame):
             activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 40),
             command=lambda: [
-                quiz_app.get_quizzes(), controller.show_frame(load_quiz_frame)
+                quiz_app.get_quizzes(), controller.show_frame(load_quiz_frame),
+                load_quiz_frame.quiz_selector(load_quiz_frame, controller)
                 ]
             )
         # Pack everything
@@ -134,28 +135,48 @@ class load_quiz_frame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.configure(bg=style.BACKGROUND_COLOR)
-        # Heading text
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        # Heading
         heading = tk.Label(
             self,
-            text="Choose a quiz!",
-            font=(style.DEFAULT_FONT, 32),
-            width=100,
+            text="Choose a quiz!", font=(style.DEFAULT_FONT, 32), width=100,
             bg=style.BACKGROUND_COLOR
             )
-        # Quiz Selector
-        self.columnconfigure([0, 3], weight=5)
-        self.columnconfigure(1, weight=100)
-        self.columnconfigure(2, weight=1)
-        canvas_container = tk.Canvas(
-            self, width=900, height=480, bg="#DDDDDD"
-            )
-        options = tk.Frame(canvas_container)
-        scrollbar = tk.Scrollbar(
+        # Back button
+        back_button = tk.Button(
             self,
-            orient="vertical",
-            command=canvas_container.yview
+            text="Back",
+            width=18,
+            bd=0, bg=style.BLUE_BUTTON,
+            activebackground=style.ACTIVE_BLUE,
+            font=(style.DEFAULT_FONT, 18),
+            command=lambda: [
+                controller.show_frame(title_frame),
+                self.canvas_container.destroy(),
+                self.scrollbar.destroy()
+            ]
+        )
+        # Pack everything
+        heading.grid(row=0, column=0, sticky="new", pady=60)
+        load_quiz_frame.container = tk.Frame(self, bg=style.BACKGROUND_COLOR)
+        load_quiz_frame.container.grid(row=1, column=0, sticky="ns")
+        back_button.grid(
+            row=2, column=0,
+            sticky="ew", padx=200, pady=50
             )
-        canvas_container.create_window(
+
+    def quiz_selector(self, controller):
+        self.canvas_container = tk.Canvas(
+            self.container, width=900, height=480, bg="#DDDDDD"
+            )
+        options = tk.Frame(self.canvas_container)
+        self.scrollbar = tk.Scrollbar(
+            self.container,
+            orient="vertical",
+            command=self.canvas_container.yview
+            )
+        self.canvas_container.create_window(
             (0, 0),
             window=options,
             anchor="nw"
@@ -176,7 +197,11 @@ class load_quiz_frame(tk.Frame):
                 activebackground=style.ACTIVE_BLUE,
                 relief="flat",
                 command=lambda button_no=button_no: [
-                        self.load_quiz(button_no, controller),
+                        self.load_quiz(
+                            self, button_no, controller, randomize=True
+                            ),
+                        self.canvas_container.destroy(),
+                        self.scrollbar.destroy(),
                         controller.show_frame(quiz_info_frame)
                     ]
             )
@@ -184,34 +209,15 @@ class load_quiz_frame(tk.Frame):
             button.pack(fill="x")
 
         options.update()
-        canvas_container.configure(
-            yscrollcommand=scrollbar.set,
+        self.canvas_container.configure(
+            yscrollcommand=self.scrollbar.set,
             scrollregion="0 0 0 %s" % options.winfo_height()
             )
-        # Back button
-        back_button = tk.Button(
-            self,
-            text="Back",
-            width=18,
-            bd=0, bg=style.BLUE_BUTTON,
-            activebackground=style.ACTIVE_BLUE,
-            font=(style.DEFAULT_FONT, 18),
-            command=lambda: controller.show_frame(title_frame)
-        )
-        # Pack everything
-        spacer1 = tk.Label(self)
-        spacer2 = tk.Label(self)
-        spacer1.grid(row=0, column=0, sticky="ew", padx=180)
-        spacer2.grid(row=0, column=3, sticky="ew", padx=180)
-        heading.grid(row=0, column=1, columnspan=2, sticky="ew", pady=60)
-        canvas_container.grid(row=1, column=1, sticky="ew")
-        scrollbar.grid(row=1, column=2, sticky="ns")
-        back_button.grid(
-            row=2, column=1, columnspan=2,
-            sticky="ew", padx=200, pady=50
-            )
+        # Pack canvas and scrollbar to center
+        self.canvas_container.pack(side="left")
+        self.scrollbar.pack(side="left", fill="y", anchor="e")
 
-    def load_quiz(self, quiz_no, controller):
+    def load_quiz(self, quiz_no, controller, randomize=False):
         global questions, options, answers, score
         questions = []
         options = []
@@ -228,15 +234,18 @@ class load_quiz_frame(tk.Frame):
             quiz_info_frame.info_label.configure(
                 text="Total {} questions".format(len(quiz_info["questions"]))
                 )
+            print(quiz_info)
             # Puts questions in random order
-            random.shuffle(quiz_info["questions"])
+            if randomize:
+                random.shuffle(quiz_info["questions"])
             # For each question shuffle options and append to the lists
             for i in range(len(quiz_info["questions"])):
                 answer = (
                     quiz_info["questions"][i]["options"]
                     [quiz_info["questions"][i]["answer"]]
                 )
-                random.shuffle(quiz_info["questions"][i]["options"])
+                if randomize:
+                    random.shuffle(quiz_info["questions"][i]["options"])
                 answer = (
                     quiz_info["questions"][i]["options"].index(answer)
                     )
@@ -330,7 +339,10 @@ class quiz_info_frame(tk.Frame):
             bd=0,
             bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 18),
-            command=lambda: controller.show_frame(load_quiz_frame)
+            command=lambda: [
+                controller.show_frame(load_quiz_frame),
+                load_quiz_frame.quiz_selector(load_quiz_frame, controller)
+            ]
         )
         # Pack everything
         spacer1 = tk.Label(self)
@@ -582,7 +594,11 @@ class create_edit_quiz_frame(tk.Frame):
             width=20,
             command=lambda: [
                 controller.show_frame(create_quiz_frame),
-                create_quiz_frame.title_entry.delete(0, tk.END)
+                create_quiz_frame.title_entry.delete(0, tk.END),
+                create_quiz_frame.title_entry.bind(
+                    "Return",
+                    lambda e: create_quiz_frame.create_quiz(controller)
+                    )
             ]
         )
         edit_button = tk.Button(
@@ -647,8 +663,8 @@ class create_quiz_frame(tk.Frame):
             font=(style.DEFAULT_FONT, 18),
             state="normal"
         )
-        self.title_entry.bind(
-            "<Return>", lambda event: self.create_quiz(controller)
+        create_quiz_frame.title_entry.bind(
+            "<Return>", lambda e: self.create_quiz(controller)
         )
         self.submit_button = tk.Button(
             self,
@@ -681,6 +697,7 @@ class create_quiz_frame(tk.Frame):
             )
 
     def create_quiz(self, controller):
+        self.title_entry.unbind("<Return>")
         # Get the title from user from the title entry box
         title = self.title_entry.get().lower().replace(" ", "_")
         try:
@@ -688,11 +705,30 @@ class create_quiz_frame(tk.Frame):
             open(
                 "dependencies//quizzes//{title}.json".format(title=title), "x"
             )
-            edit_quiz_frame.edit_quiz(self, title, controller)
+            # Open the new json file and write the title to it
+            with open(
+                "dependencies//quizzes//{title}.json".format(title=title), "w"
+            ) as f:
+                json.dump({
+                    "title": title,
+                    "questions": [
+                        {
+                            "question": "Enter question here",
+                            "options": [
+                                "Enter option 1 here", "Enter option 2 here",
+                                "Enter option 3 here", "Enter option 4 here"
+                                ],
+                            "answer": 0
+                        }
+                    ]
+                    }, f, indent=4)
+            # Show the edit quiz frame
+            edit_quiz_frame.edit_quiz(edit_quiz_frame, title, controller)
+            controller.show_frame(edit_quiz_frame)
         except FileExistsError:
             # Show error message if file already exists with buttons to
             # overwrite or edit the quiz with the same name
-            create_quiz_frame.title_entry.configure(state="disabled")
+            self.title_entry.configure(state="disabled")
             self.submit_button.configure(state="disabled")
             self.back_button.configure(state="disabled")
             self.error_label = tk.Label(
@@ -711,8 +747,8 @@ class create_quiz_frame(tk.Frame):
                     edit_quiz_frame.edit_quiz(
                         edit_quiz_frame, title, controller
                         ),
-                    self.destroy_error_label(),
-                    controller.show_frame(edit_quiz_frame)
+                    controller.show_frame(edit_quiz_frame),
+                    self.destroy_error_label(controller)
                 ]
             )
             # Delete and create new quiz with same name
@@ -728,7 +764,7 @@ class create_quiz_frame(tk.Frame):
                         .format(title=title)
                         ),
                     self.create_quiz(controller),
-                    self.destroy_error_label(),
+                    self.destroy_error_label(controller),
                     edit_quiz_frame.edit_quiz(
                         edit_quiz_frame, title, controller
                         ),
@@ -742,7 +778,7 @@ class create_quiz_frame(tk.Frame):
                 width=15,
                 bd=0, bg=style.BLUE_BUTTON,
                 padx=10, pady=10,
-                command=lambda: self.destroy_error_label()
+                command=lambda: self.destroy_error_label(controller)
             )
             # Pack error label and buttons
             self.error_label.place(relx=0.5, rely=0.5, anchor="center")
@@ -752,7 +788,7 @@ class create_quiz_frame(tk.Frame):
                 )
             self.cancel_button.place(relx=0.7, rely=0.6, anchor="center")
 
-    def destroy_error_label(self):
+    def destroy_error_label(self, controller):
         self.error_label.destroy()
         self.edit_quiz_button.destroy()
         self.overwrite_quiz_button.destroy()
@@ -760,11 +796,15 @@ class create_quiz_frame(tk.Frame):
         self.title_entry.configure(state="normal")
         self.submit_button.configure(state="normal")
         self.back_button.configure(state="normal")
+        self.title_entry.bind(
+            "<Return>", lambda e: self.create_quiz(controller)
+            )
 
 
 # ---------- Code for Edit Quiz Screen ----------
 class edit_quiz_frame(tk.Frame):
     question_no = 0
+    title = ""
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -889,6 +929,8 @@ class edit_quiz_frame(tk.Frame):
             controller
             )
         self.show_question(self, self.question_no)
+        # Updates quiz_title class variable
+        self.title = title
 
         print(questions)
         print(options)
@@ -922,6 +964,68 @@ class edit_quiz_frame(tk.Frame):
             edit_quiz_frame.next_button.configure(state="disabled")
         else:
             edit_quiz_frame.next_button.configure(state="normal")
+
+    def submit_question(self):
+        global questions, options, answers
+        # Update the questions, options, and answers lists
+        questions[self.question_no] = edit_quiz_frame.question_entry.get()
+        options[self.question_no] = [
+            edit_quiz_frame.option1_entry.get(),
+            edit_quiz_frame.option2_entry.get(),
+            edit_quiz_frame.option3_entry.get(),
+            edit_quiz_frame.option4_entry.get()
+            ]
+        answers[self.question_no] = int(
+            edit_quiz_frame.correct_option_entry.get()
+            )-1
+        # Calls dump_quiz function to update the quiz
+        self.dump_quiz(questions, options, answers)
+        # Display an indication that the question has been updated
+        info_label = tk.Label(
+            text="Question updated",
+            bg=style.GREEN_BUTTON,
+            font=(style.DEFAULT_FONT, 18)
+        )
+        info_label.place(relx=0.5, rely=0.5, anchor="center")
+        info_label.after(1000, lambda: info_label.destroy())
+
+    def new_question():
+        global questions, options, answers
+        # Default values for new question
+        default_question = "Enter question here"
+        default_options = [
+            "Enter option 1 here", "Enter option 2 here",
+            "Enter option 3 here", "Enter option 4 here"
+            ]
+        default_answer = 0
+        # Append a new question to the json file
+        questions.append(default_question)
+        options.append(default_options)
+        answers.append(default_answer)
+
+    def dump_quiz(self, questions, options, answers):
+        # Format data in json format
+        data = {
+            "title": self.title.replace("_", " "),
+            "questions": [],
+        }
+        for i in range(len(questions)):
+            question_dict = {}
+            question_dict["question"] = questions[i]
+            question_dict["options"] = options[i]
+            question_dict["answer"] = answers[i]
+            data["questions"].append(question_dict)
+        # Dump to json file
+        path = "dependencies//quizzes//{title}.json".format(title=self.title)
+        with open(path, "w") as f:
+            f.seek(0)  # Rewinds file to the start
+            json.dump(
+                data,
+                f,
+                ensure_ascii=True,
+                indent=4
+            )
+            f.truncate()  # Deletes extra data
 
 
 # Run mainloop
