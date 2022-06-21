@@ -80,7 +80,7 @@ class title_frame(tk.Frame):
             bg=style.BACKGROUND_COLOR
         )
         description = tk.Label(
-            master=welcome, 
+            master=welcome,
             text="Create your own or load a quiz using the corresponding "
             "buttons below!",
             font=(style.DEFAULT_FONT, 24), bg=style.BACKGROUND_COLOR
@@ -489,7 +489,7 @@ class quiz_frame(tk.Frame):
         # Show finish frame and shows the score
         controller.show_frame(finish_frame)
         finish_frame.final_score_label.configure(
-            text="Your Final Score is: {}!".format(score)
+            text="Your Final Score is: {}\n Well Done :)".format(score)
             )
 
 
@@ -791,7 +791,14 @@ class edit_quiz_frame(tk.Frame):
         edit_quiz_frame.previous_button = tk.Button(
             self, text="Previous Question", **text_attributes,
             bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
-            command=lambda: self.show_question(self.question_no-1)
+            command=lambda: [
+                self.show_question(self.question_no-1),
+                edit_quiz_frame.next_button.configure(
+                    text="Next Question", **text_attributes,
+                    bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
+                    command=lambda: self.show_question(self.question_no+1)
+                    )
+            ]
         )
         # Pack everything
         self.back_button.grid(row=0, column=0, sticky="ew", padx=20, pady=20)
@@ -878,15 +885,9 @@ class edit_quiz_frame(tk.Frame):
                 text="New Question",
                 bg=style.GREEN_BUTTON, activebackground=style.ACTIVE_GREEN,
                 command=lambda: [
-                    self.new_question(self),
-                    self.show_question(self, self.question_no+1)
+                    self.new_question(),
+                    self.show_question(self.question_no+1)
                     ]
-                )
-        else:
-            edit_quiz_frame.next_button.configure(
-                text="Next Question",
-                bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
-                command=lambda: self.show_question(self, self.question_no+1)
                 )
 
     def submit_question(self):
@@ -922,7 +923,7 @@ class edit_quiz_frame(tk.Frame):
             ])
         answers.append(0)
         # Dump the new question to the json file
-        self.dump_quiz(self, questions, options, answers)
+        self.dump_quiz(questions, options, answers)
 
     def dump_quiz(self, questions, options, answers):
         # Format data in json format

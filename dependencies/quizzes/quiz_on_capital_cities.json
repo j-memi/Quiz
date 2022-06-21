@@ -20,6 +20,76 @@
 				"Madrid"
 			],
 			"answer": 2
+		},
+		{
+			"question": "What is the capital of Peru?",
+			"options": [
+				"Cusco",
+				"Lima",
+				"Oslo",
+				"Madrid"
+			],
+			"answer": 1
+		},
+		{
+			"question": "What is the capital of Indonesia?",
+			"options": [
+				"Jakarta",
+				"Ankara",
+				"Berlin",
+				"Surabaya"
+			],
+			"answer": 0
+		},
+		{
+			"question": "What is the capital of Portugal?",
+			"options": [
+				"Braga",
+				"Lisbon",
+				"Taro",
+				"Porto"
+			],
+			"answer": 1
+		},
+		{
+			"question": "What is the capital of Spain?",
+			"options": [
+				"Havana",
+				"Lisbon",
+				"Berlin",
+				"Madrid"
+			],
+			"answer": 3
+		},
+		{
+			"question": "What is the capital of Australia?",
+			"options": [
+				"Sydney",
+				"Canberra",
+				"Peru",
+				"Wellington"
+			],
+			"answer": 1
+		},
+		{
+			"question": "What is the capital of New Zealand?",
+			"options": [
+				"Auckland",
+				"Sydney",
+				"Christchurch",
+				"Wellington"
+			],
+			"answer": 3
+		},
+		{
+			"question": "What is the capital of Canada?",
+			"options": [
+				"Ottawa",
+				"Toronto",
+				"Vancouver",
+				"Montreal"
+			],
+			"answer": 0
 		}
 		]
 }
