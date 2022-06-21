@@ -878,10 +878,12 @@ class edit_quiz_frame(tk.Frame):
         )
         edit_quiz_frame.next_button = tk.Button(
             self, text="Next Question", **text_attributes,
+            bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             command=lambda: self.show_question(self.question_no+1)
         )
         edit_quiz_frame.previous_button = tk.Button(
             self, text="Previous Question", **text_attributes,
+            bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             command=lambda: self.show_question(self.question_no-1)
         )
         # Pack everything
@@ -915,11 +917,18 @@ class edit_quiz_frame(tk.Frame):
             row=4, column=1, columnspan=2, sticky="ew"
             )
         self.correct_label.grid(row=3, column=0, sticky="ew", padx=20, pady=20)
-        edit_quiz_frame.next_button.grid(row=4, column=3, sticky="ew")
-        edit_quiz_frame.previous_button.grid(row=4, column=0, sticky="ew")
+        edit_quiz_frame.next_button.grid(
+            row=4, column=3, sticky="ew", padx=15, pady=10, ipady=5
+            )
+        edit_quiz_frame.previous_button.grid(
+            row=4, column=0, sticky="ew", padx=15, pady=10, ipady=5
+            )
 
     def edit_quiz(self, title, controller):
         global questions, options, answers
+        # Updates the class variables
+        self.title = title
+        self.question_no = 0
         # Loads selected quiz
         quiz_list = quiz_app.get_quizzes()
         quiz_no = quiz_list.index("{title}.json".format(title=title))
@@ -928,13 +937,10 @@ class edit_quiz_frame(tk.Frame):
             quiz_no,
             controller
             )
-        self.show_question(self, self.question_no)
-        # Updates quiz_title class variable
-        self.title = title
-
         print(questions)
         print(options)
         print(answers)
+        self.show_question(self, self.question_no)
 
     def show_question(self, question_no):
         # Change class variable to the passed in argument question_no
@@ -961,9 +967,20 @@ class edit_quiz_frame(tk.Frame):
         else:
             edit_quiz_frame.previous_button.configure(state="normal")
         if question_no == len(questions)-1:
-            edit_quiz_frame.next_button.configure(state="disabled")
+            edit_quiz_frame.next_button.configure(
+                text="New Question",
+                bg=style.GREEN_BUTTON, activebackground=style.ACTIVE_GREEN,
+                command=lambda: [
+                    self.new_question(self),
+                    self.show_question(self, self.question_no+1)
+                    ]
+                )
         else:
-            edit_quiz_frame.next_button.configure(state="normal")
+            edit_quiz_frame.next_button.configure(
+                text="Next Question",
+                bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
+                command=lambda: self.show_question(self, self.question_no+1)
+                )
 
     def submit_question(self):
         global questions, options, answers
@@ -989,19 +1006,17 @@ class edit_quiz_frame(tk.Frame):
         info_label.place(relx=0.5, rely=0.5, anchor="center")
         info_label.after(1000, lambda: info_label.destroy())
 
-    def new_question():
+    def new_question(self):
         global questions, options, answers
-        # Default values for new question
-        default_question = "Enter question here"
-        default_options = [
+        # Append a new question to the json file
+        questions.append("Enter question here")
+        options.append([
             "Enter option 1 here", "Enter option 2 here",
             "Enter option 3 here", "Enter option 4 here"
-            ]
-        default_answer = 0
-        # Append a new question to the json file
-        questions.append(default_question)
-        options.append(default_options)
-        answers.append(default_answer)
+            ])
+        answers.append(0)
+        # Dump the new question to the json file
+        self.dump_quiz(self, questions, options, answers)
 
     def dump_quiz(self, questions, options, answers):
         # Format data in json format
