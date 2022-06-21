@@ -76,39 +76,26 @@ class title_frame(tk.Frame):
         self.configure(bg=style.BACKGROUND_COLOR)
         welcome = tk.Frame(self, bg=style.BACKGROUND_COLOR)
         heading = tk.Label(
-            master=welcome,
-            text="Welcome!",
-            font=(style.DEFAULT_FONT, 32),
+            master=welcome, text="Welcome!", font=(style.DEFAULT_FONT, 32),
             bg=style.BACKGROUND_COLOR
         )
         description = tk.Label(
-            master=welcome,
+            master=welcome, 
             text="Create your own or load a quiz using the corresponding "
             "buttons below!",
-            font=(style.DEFAULT_FONT, 24),
-            bg=style.BACKGROUND_COLOR
+            font=(style.DEFAULT_FONT, 24), bg=style.BACKGROUND_COLOR
             )
         buttons = tk.Frame(self, bg=style.BACKGROUND_COLOR)
         create_button = tk.Button(
-            master=buttons,
-            text="Create/Edit Quiz",
-            width=12,
-            padx=90,
-            pady=80,
-            bd=0, bg=style.BLUE_BUTTON,
-            activebackground=style.ACTIVE_BLUE,
+            master=buttons, text="Create/Edit Quiz", width=12,
+            padx=90, pady=80,
+            bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 40),
             command=lambda: controller.show_frame(create_edit_quiz_frame)
         )
         load_button = tk.Button(
-            master=buttons,
-            text="Load Quiz",
-            width=12,
-            padx=90,
-            pady=80,
-            bd=0,
-            bg=style.BLUE_BUTTON,
-            activebackground=style.ACTIVE_BLUE,
+            master=buttons, text="Load Quiz", width=12, padx=90, pady=80,
+            bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 40),
             command=lambda: [
                 quiz_app.get_quizzes(), controller.show_frame(load_quiz_frame),
@@ -139,17 +126,13 @@ class load_quiz_frame(tk.Frame):
         self.columnconfigure(0, weight=1)
         # Heading
         heading = tk.Label(
-            self,
-            text="Choose a quiz!", font=(style.DEFAULT_FONT, 32), width=100,
-            bg=style.BACKGROUND_COLOR
+            self, text="Choose a quiz!",
+            font=(style.DEFAULT_FONT, 32), width=100, bg=style.BACKGROUND_COLOR
             )
         # Back button
         back_button = tk.Button(
-            self,
-            text="Back",
-            width=18,
-            bd=0, bg=style.BLUE_BUTTON,
-            activebackground=style.ACTIVE_BLUE,
+            self, text="Back", width=18,
+            bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 18),
             command=lambda: [
                 controller.show_frame(title_frame),
@@ -190,11 +173,9 @@ class load_quiz_frame(tk.Frame):
             button = tk.Button(
                 master=button_border,
                 text=item.replace(".json", "").replace("_", " ").title(),
-                width=58,
-                wraplength=900,
+                width=58, wraplength=900,
                 font=(style.DEFAULT_FONT, 20),
-                bd=0, bg=style.BLUE_BUTTON,
-                activebackground=style.ACTIVE_BLUE,
+                bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
                 relief="flat",
                 command=lambda button_no=button_no: [
                         self.load_quiz(
@@ -255,17 +236,12 @@ class load_quiz_frame(tk.Frame):
         except FileNotFoundError:
             error = tk.Frame(quiz_app, bg=style.BACKGROUND_COLOR)
             error_label = tk.Label(
-                master=error,
-                text="Unable to load quiz.\nQuiz not found.",
-                font=(style.DEFAULT_FONT, 32),
-                bg=style.BACKGROUND_COLOR
+                master=error, text="Unable to load quiz.\nQuiz not found.",
+                font=(style.DEFAULT_FONT, 32), bg=style.BACKGROUND_COLOR
                 )
             back_button = tk.Button(
-                master=error,
-                text="Back to title screen",
-                width=18,
-                bd=0, bg=style.BLUE_BUTTON,
-                activebackground=style.ACTIVE_BLUE,
+                master=error, text="Back to title screen", width=18,
+                bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
                 font=(style.DEFAULT_FONT, 40),
                 command=lambda: [
                     controller.show_frame(title_frame),
@@ -284,15 +260,11 @@ class load_quiz_frame(tk.Frame):
                     "Unable to load quiz.\n"
                     "File is empty or not in JSON format."
                     ),
-                font=(style.DEFAULT_FONT, 32),
-                bg=style.BACKGROUND_COLOR
+                font=(style.DEFAULT_FONT, 32), bg=style.BACKGROUND_COLOR
                 )
             back_button = tk.Button(
-                master=error,
-                text="Back to title screen",
-                width=18,
-                bd=0, bg=style.BLUE_BUTTON,
-                activebackground=style.ACTIVE_BLUE,
+                master=error, text="Back to title screen", width=18,
+                bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
                 font=(style.DEFAULT_FONT, 40),
                 command=lambda: [
                     controller.show_frame(title_frame),
@@ -312,32 +284,23 @@ class quiz_info_frame(tk.Frame):
         self.configure(bg=style.BACKGROUND_COLOR)
 
         quiz_info_frame.title_label = tk.Label(
-            self,
-            text="title",
-            wraplength=1100, width=45,
-            font=(style.DEFAULT_FONT, 32),
-            bg=style.BACKGROUND_COLOR
+            self, text="title", wraplength=1100, width=45,
+            font=(style.DEFAULT_FONT, 32), bg=style.BACKGROUND_COLOR
         )
         quiz_info_frame.info_label = tk.Label(
-            self,
-            text="info",
+            self, text="info",
             wraplength=1100, width=45,
-            font=(style.DEFAULT_FONT, 24),
-            bg=style.BACKGROUND_COLOR
+            font=(style.DEFAULT_FONT, 24), bg=style.BACKGROUND_COLOR
         )
         start_button = tk.Button(
-            self,
-            text="Start",
-            bd=0,
-            bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
+            self, text="Start",
+            bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 18),
             command=lambda: quiz_frame.start_quiz(quiz_frame, controller)
         )
         back_button = tk.Button(
-            self,
-            text="Back",
-            bd=0,
-            bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
+            self, text="Back",
+            bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 18),
             command=lambda: [
                 controller.show_frame(load_quiz_frame),
@@ -367,67 +330,53 @@ class quiz_frame(tk.Frame):
         options_frame = tk.Frame(self, bg=style.BACKGROUND_COLOR)
         bottom_frame = tk.Frame(self, bg=style.BACKGROUND_COLOR)
         quiz_frame.question_label = tk.Label(
-            master=top_frame,
-            text="question",
-            wraplength=1100,
-            font=(style.DEFAULT_FONT, 32),
-            bg=style.BACKGROUND_COLOR
+            master=top_frame, text="question", wraplength=1100,
+            font=(style.DEFAULT_FONT, 32), bg=style.BACKGROUND_COLOR
         )
         title_button = tk.Button(
-            master=top_frame,
-            text="Back to Title",
+            master=top_frame, text="Back to Title",
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 18),
             command=lambda: controller.show_frame(title_frame)
         )
         finish_button = tk.Button(
-            master=top_frame,
-            text="Finish Quiz",
+            master=top_frame, text="Finish Quiz",
             bd=0, bg="#ff3341", activebackground="#E0000F",
             font=(style.DEFAULT_FONT, 18),
             command=lambda: quiz_frame.finish_quiz(self, controller)
         )
         quiz_frame.option1 = tk.Button(
-            master=options_frame,
-            text="option1", anchor="center",
+            master=options_frame, text="option1", anchor="center",
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 18),
             command=lambda: quiz_frame.check_answer(self, 0)
         )
         quiz_frame.option2 = tk.Button(
-            master=options_frame,
-            text="option2", anchor="center",
+            master=options_frame, text="option2", anchor="center",
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 18),
             command=lambda: quiz_frame.check_answer(self, 1)
         )
         quiz_frame.option3 = tk.Button(
-            master=options_frame,
-            text="option3", anchor="center",
+            master=options_frame, text="option3", anchor="center",
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 18),
             command=lambda: quiz_frame.check_answer(self, 2)
         )
         quiz_frame.option4 = tk.Button(
-            master=options_frame,
-            text="option4", anchor="center",
+            master=options_frame, text="option4", anchor="center",
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 18),
             command=lambda: quiz_frame.check_answer(self, 3)
         )
         quiz_frame.score_label = tk.Label(
-            master=bottom_frame,
-            text="Your score: 0",
+            master=bottom_frame, text="Your score: 0",
             wraplength=1100, width=45,
-            font=(style.DEFAULT_FONT, 28),
-            bg=style.BACKGROUND_COLOR
+            font=(style.DEFAULT_FONT, 28), bg=style.BACKGROUND_COLOR
         )
         quiz_frame.skip_next_button = tk.Button(
-            self,
-            text="Skip",
-            font=(style.DEFAULT_FONT, 18),
+            self, text="Skip", font=(style.DEFAULT_FONT, 18), width=10,
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
-            width=10,
             command=lambda: quiz_frame.next_question(self, controller)
         )
 
@@ -552,17 +501,12 @@ class finish_frame(tk.Frame):
         self.columnconfigure(0, weight=1)
 
         finish_frame.final_score_label = tk.Label(
-            self,
-            text="score",
-            wraplength=1100, width=45,
-            font=(style.DEFAULT_FONT, 32),
-            bg=style.BACKGROUND_COLOR
+            self, text="score", wraplength=1100, width=45,
+            font=(style.DEFAULT_FONT, 32), bg=style.BACKGROUND_COLOR
         )
         title_button = tk.Button(
-            self,
-            text="Back to Title",
+            self, text="Back to Title", font=(style.DEFAULT_FONT, 18),
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
-            font=(style.DEFAULT_FONT, 18),
             command=lambda: controller.show_frame(title_frame)
         )
         # Pack everything
@@ -580,18 +524,14 @@ class create_edit_quiz_frame(tk.Frame):
 
         buttons_frame = tk.Frame(self, bg=style.BACKGROUND_COLOR)
         title_button = tk.Button(
-            self,
-            text="Back to Title",
+            self, text="Back to Title", font=(style.DEFAULT_FONT, 18),
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
-            font=(style.DEFAULT_FONT, 18),
             command=lambda: controller.show_frame(title_frame)
         )
         create_button = tk.Button(
-            master=buttons_frame,
-            text="Create a new quiz!",
+            master=buttons_frame, text="Create a new quiz!",
             bd=0, bg=style.GREEN_BUTTON, activebackground=style.ACTIVE_GREEN,
-            font=(style.DEFAULT_FONT, 24),
-            width=20,
+            font=(style.DEFAULT_FONT, 24), width=20,
             command=lambda: [
                 controller.show_frame(create_quiz_frame),
                 create_quiz_frame.title_entry.delete(0, tk.END),
@@ -602,19 +542,15 @@ class create_edit_quiz_frame(tk.Frame):
             ]
         )
         edit_button = tk.Button(
-            master=buttons_frame,
-            text="Edit an existing quiz!",
+            master=buttons_frame, text="Edit an existing quiz!",
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
-            font=(style.DEFAULT_FONT, 24),
-            width=20,
+            font=(style.DEFAULT_FONT, 24), width=20,
             command=lambda: controller.show_frame(edit_quiz_frame)
         )
         delete_button = tk.Button(
-            master=buttons_frame,
-            text="Delete a quiz",
+            master=buttons_frame, text="Delete a quiz",
             bd=0, bg=style.RED_BUTTON, activebackground=style.ACTIVE_RED,
-            font=(style.DEFAULT_FONT, 24),
-            width=20,
+            font=(style.DEFAULT_FONT, 24), width=20,
             command=lambda: controller.show_frame(delete_quiz_frame)
         )
         # Pack everything
@@ -644,41 +580,31 @@ class create_quiz_frame(tk.Frame):
             bg=style.BACKGROUND_COLOR
         )
         instructions_label = tk.Label(
-            self,
+            self, bg=style.BACKGROUND_COLOR,
             text=(
                 "Maximum of 30 characters\nThe title cannot be empty\n"
                 "THE TITLE CANNOT BE CHANGED LATER"
                 ),
-            font=(style.DEFAULT_FONT, 18), justify="center",
-            bg=style.BACKGROUND_COLOR
+            font=(style.DEFAULT_FONT, 18), justify="center"
         )
         input_title_label = tk.Label(
-            self,
-            text="Quiz Title:",
-            font=(style.DEFAULT_FONT, 18),
+            self, text="Quiz Title:", font=(style.DEFAULT_FONT, 18),
             bg=style.BACKGROUND_COLOR
         )
         create_quiz_frame.title_entry = tk.Entry(
-            self,
-            font=(style.DEFAULT_FONT, 18),
-            state="normal"
+            self, font=(style.DEFAULT_FONT, 18), state="normal"
         )
         create_quiz_frame.title_entry.bind(
             "<Return>", lambda e: self.create_quiz(controller)
         )
         self.submit_button = tk.Button(
-            self,
-            font=(style.DEFAULT_FONT, 18),
-            text="Submit",
+            self, font=(style.DEFAULT_FONT, 18), text="Submit", state="normal",
             bd=0, bg=style.GREEN_BUTTON, activebackground=style.ACTIVE_GREEN,
-            state="normal",
             command=lambda: self.create_quiz(controller)
         )
         self.back_button = tk.Button(
-            self,
-            text="Back",
+            self, text="Back", font=(style.DEFAULT_FONT, 18),
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
-            font=(style.DEFAULT_FONT, 18),
             command=lambda: controller.show_frame(create_edit_quiz_frame)
         )
 
@@ -733,16 +659,12 @@ class create_quiz_frame(tk.Frame):
             self.back_button.configure(state="disabled")
             self.error_label = tk.Label(
                 text="Quiz with this title already exists.",
-                font=(style.DEFAULT_FONT, 40),
-                bg=style.RED_BUTTON,
+                font=(style.DEFAULT_FONT, 40), bg=style.RED_BUTTON,
             )
             # Edits the existing quiz without creating new quiz
             self.edit_quiz_button = tk.Button(
-                text="Edit the quiz",
-                font=(style.DEFAULT_FONT, 18),
-                width=15,
-                bd=0, bg=style.GREEN_BUTTON,
-                padx=10, pady=10,
+                text="Edit the quiz", font=(style.DEFAULT_FONT, 18), width=15,
+                bd=0, bg=style.GREEN_BUTTON, padx=10, pady=10,
                 command=lambda: [
                     edit_quiz_frame.edit_quiz(
                         edit_quiz_frame, title, controller
@@ -753,11 +675,8 @@ class create_quiz_frame(tk.Frame):
             )
             # Delete and create new quiz with same name
             self.overwrite_quiz_button = tk.Button(
-                text="Overwrite the quiz",
-                font=(style.DEFAULT_FONT, 18),
-                width=15,
-                bd=0, bg=style.RED_BUTTON,
-                padx=10, pady=10,
+                text="Overwrite the quiz", font=(style.DEFAULT_FONT, 18),
+                width=15, bd=0, bg=style.RED_BUTTON, padx=10, pady=10,
                 command=lambda: [
                     os.remove(
                         "dependencies//quizzes//{title}.json"
@@ -773,11 +692,8 @@ class create_quiz_frame(tk.Frame):
             )
             # Removes error label and allows user to enter new title
             self.cancel_button = tk.Button(
-                text="Cancel",
-                font=(style.DEFAULT_FONT, 18),
-                width=15,
-                bd=0, bg=style.BLUE_BUTTON,
-                padx=10, pady=10,
+                text="Cancel", font=(style.DEFAULT_FONT, 18), width=15,
+                bd=0, bg=style.BLUE_BUTTON, padx=10, pady=10,
                 command=lambda: self.destroy_error_label(controller)
             )
             # Pack error label and buttons
@@ -809,9 +725,7 @@ class edit_quiz_frame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.configure(bg=style.BACKGROUND_COLOR)
-        self.columnconfigure(
-            [0, 1, 2, 3], uniform="edit_quiz"
-            )
+        self.columnconfigure([0, 1, 2, 3], uniform="edit_quiz")
         self.columnconfigure([0, 3], weight=1)
         self.columnconfigure([1, 2], weight=2)
         self.rowconfigure([0, 1, 2, 3, 4], weight=1)
@@ -821,9 +735,7 @@ class edit_quiz_frame(tk.Frame):
             "justify": "center"
             }
         self.back_button = tk.Button(
-            self,
-            text="Back",
-            font=(style.DEFAULT_FONT, 18),
+            self, text="Back", font=(style.DEFAULT_FONT, 18),
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             command=lambda: controller.show_frame(create_edit_quiz_frame)
         )
@@ -847,10 +759,8 @@ class edit_quiz_frame(tk.Frame):
             0, "Enter correct option here. 1, 2, 3, 4"
             )
         self.correct_label = tk.Label(
-            self,
-            text="Correct option box:\n1, 2, 3 or 4",
-            **text_attributes,
-            bg=style.BACKGROUND_COLOR
+            self, text="Correct option box:\n1, 2, 3 or 4",
+            **text_attributes, bg=style.BACKGROUND_COLOR
         )
         self.option1_label = tk.Label(
             self, text="Option 1 box -",
@@ -869,11 +779,8 @@ class edit_quiz_frame(tk.Frame):
             **text_attributes, bg=style.BACKGROUND_COLOR
         )
         edit_quiz_frame.save_button = tk.Button(
-            self,
-            text="Save",
-            **text_attributes,
-            bd=0, bg=style.GREEN_BUTTON,
-            activebackground=style.ACTIVE_GREEN,
+            self, text="Save", **text_attributes,
+            bd=0, bg=style.GREEN_BUTTON, activebackground=style.ACTIVE_GREEN,
             command=lambda: self.submit_question()
         )
         edit_quiz_frame.next_button = tk.Button(
@@ -999,8 +906,7 @@ class edit_quiz_frame(tk.Frame):
         self.dump_quiz(questions, options, answers)
         # Display an indication that the question has been updated
         info_label = tk.Label(
-            text="Question updated",
-            bg=style.GREEN_BUTTON,
+            text="Question updated", bg=style.GREEN_BUTTON,
             font=(style.DEFAULT_FONT, 18)
         )
         info_label.place(relx=0.5, rely=0.5, anchor="center")
