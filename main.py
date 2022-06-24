@@ -6,7 +6,6 @@ import style
 
 
 class quiz_app(tk.Tk):
-
     def __init__(self):
         tk.Tk.__init__(self)
 
@@ -33,7 +32,7 @@ class quiz_app(tk.Tk):
             create_edit_quiz_frame,
             create_quiz_frame,
             edit_quiz_frame,
-            # delete_quiz_frame,
+            delete_quiz_frame,
             quiz_info_frame,
             quiz_frame,
             finish_frame
@@ -50,6 +49,7 @@ class quiz_app(tk.Tk):
         frame = self.frames[frame]
         frame.tkraise()
 
+    # Puts every file from dependencies//quizzes into global variable quiz_list
     def get_quizzes():
         global quiz_list
         try:
@@ -99,7 +99,9 @@ class title_frame(tk.Frame):
             font=(style.DEFAULT_FONT, 40),
             command=lambda: [
                 quiz_app.get_quizzes(), controller.show_frame(load_quiz_frame),
-                load_quiz_frame.quiz_selector(load_quiz_frame, controller)
+                load_quiz_frame.quiz_selector(
+                    load_quiz_frame, quiz_info_frame, controller
+                    )
                 ]
             )
         # Pack everything
@@ -126,7 +128,7 @@ class load_quiz_frame(tk.Frame):
         self.columnconfigure(0, weight=1)
         # Heading
         heading = tk.Label(
-            self, text="Choose a quiz!",
+            self, text="Select a quiz",
             font=(style.DEFAULT_FONT, 32), width=100, bg=style.BACKGROUND_COLOR
             )
         # Back button
@@ -149,7 +151,8 @@ class load_quiz_frame(tk.Frame):
             sticky="ew", padx=200, pady=50
             )
 
-    def quiz_selector(self, controller):
+    def quiz_selector(self, frame, controller):
+        # Set up canvas and scrollbar for the quiz selector
         self.canvas_container = tk.Canvas(
             self.container, width=900, height=480, bg="#DDDDDD"
             )
@@ -177,19 +180,22 @@ class load_quiz_frame(tk.Frame):
                 font=(style.DEFAULT_FONT, 20),
                 bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
                 relief="flat",
-                command=lambda button_no=button_no: [
+                command=lambda button_no=button_no, title=item: [
                         self.load_quiz(
                             self, button_no, controller, randomize=True
                             ),
                         self.canvas_container.destroy(),
                         self.scrollbar.destroy(),
-                        controller.show_frame(quiz_info_frame)
+                        self.load_edit_quiz(self, frame, title, controller),
+                        controller.show_frame(frame)
                     ]
             )
             button_border.pack(fill="x")
             button.pack(fill="x")
 
+        # Updates the frame
         options.update()
+        # Sets up the scrollbar for how many things are in the quiz selector
         self.canvas_container.configure(
             yscrollcommand=self.scrollbar.set,
             scrollregion="0 0 0 %s" % options.winfo_height()
@@ -197,6 +203,16 @@ class load_quiz_frame(tk.Frame):
         # Pack canvas and scrollbar to center
         self.canvas_container.pack(side="left")
         self.scrollbar.pack(side="left", fill="y", anchor="e")
+
+    def load_edit_quiz(self, frame, title, controller):
+        # Calls different functions depending on which frame the quiz selector
+        # buttons go to
+        if frame == edit_quiz_frame:
+            edit_quiz_frame.edit_quiz(
+                edit_quiz_frame, title.replace(".json", ""), controller
+                )  # Opens the selected quiz to be edited
+        if frame == delete_quiz_frame:
+            delete_quiz_frame.quiz_title = title  # Set class variable to title
 
     def load_quiz(self, quiz_no, controller, randomize=False):
         global questions, options, answers, score
@@ -304,7 +320,8 @@ class quiz_info_frame(tk.Frame):
             font=(style.DEFAULT_FONT, 18),
             command=lambda: [
                 controller.show_frame(load_quiz_frame),
-                load_quiz_frame.quiz_selector(load_quiz_frame, controller)
+                load_quiz_frame.quiz_selector(
+                    load_quiz_frame, quiz_info_frame, controller)
             ]
         )
         # Pack everything
@@ -325,10 +342,10 @@ class quiz_frame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.configure(bg=style.BACKGROUND_COLOR)
-
         top_frame = tk.Frame(self, bg=style.BACKGROUND_COLOR)
         options_frame = tk.Frame(self, bg=style.BACKGROUND_COLOR)
         bottom_frame = tk.Frame(self, bg=style.BACKGROUND_COLOR)
+        # Widget Setup
         quiz_frame.question_label = tk.Label(
             master=top_frame, text="question", wraplength=1100,
             font=(style.DEFAULT_FONT, 32), bg=style.BACKGROUND_COLOR
@@ -379,7 +396,6 @@ class quiz_frame(tk.Frame):
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             command=lambda: quiz_frame.next_question(self, controller)
         )
-
         # Pack everything
         top_frame.columnconfigure([0, 2], weight=1)
         top_frame.columnconfigure(1, weight=30)
@@ -545,13 +561,23 @@ class create_edit_quiz_frame(tk.Frame):
             master=buttons_frame, text="Edit an existing quiz!",
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 24), width=20,
-            command=lambda: controller.show_frame(edit_quiz_frame)
+            command=lambda: [
+                controller.show_frame(load_quiz_frame),
+                load_quiz_frame.quiz_selector(
+                    load_quiz_frame, edit_quiz_frame, controller
+                    )
+            ]
         )
         delete_button = tk.Button(
             master=buttons_frame, text="Delete a quiz",
             bd=0, bg=style.RED_BUTTON, activebackground=style.ACTIVE_RED,
             font=(style.DEFAULT_FONT, 24), width=20,
-            command=lambda: controller.show_frame(delete_quiz_frame)
+            command=lambda: [
+                controller.show_frame(load_quiz_frame),
+                load_quiz_frame.quiz_selector(
+                    load_quiz_frame, delete_quiz_frame, controller
+                )
+            ]
         )
         # Pack everything
         buttons_frame.columnconfigure([0, 1, 2], weight=1)
@@ -784,21 +810,12 @@ class edit_quiz_frame(tk.Frame):
             command=lambda: self.submit_question()
         )
         edit_quiz_frame.next_button = tk.Button(
-            self, text="Next Question", **text_attributes,
-            bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
-            command=lambda: self.show_question(self.question_no+1)
+            self, text="Next Question", **text_attributes
         )
         edit_quiz_frame.previous_button = tk.Button(
             self, text="Previous Question", **text_attributes,
             bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
-            command=lambda: [
-                self.show_question(self.question_no-1),
-                edit_quiz_frame.next_button.configure(
-                    text="Next Question", **text_attributes,
-                    bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
-                    command=lambda: self.show_question(self.question_no+1)
-                    )
-            ]
+            command=lambda: self.show_question(self.question_no-1)
         )
         # Pack everything
         self.back_button.grid(row=0, column=0, sticky="ew", padx=20, pady=20)
@@ -851,9 +868,6 @@ class edit_quiz_frame(tk.Frame):
             quiz_no,
             controller
             )
-        print(questions)
-        print(options)
-        print(answers)
         self.show_question(self, self.question_no)
 
     def show_question(self, question_no):
@@ -885,10 +899,18 @@ class edit_quiz_frame(tk.Frame):
                 text="New Question",
                 bg=style.GREEN_BUTTON, activebackground=style.ACTIVE_GREEN,
                 command=lambda: [
-                    self.new_question(),
-                    self.show_question(self.question_no+1)
+                    edit_quiz_frame.new_question(self),
+                    edit_quiz_frame.show_question(self, self.question_no+1)
                     ]
                 )
+        else:
+            edit_quiz_frame.next_button.configure(
+                text="Next Question",
+                bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
+                command=lambda: (
+                    edit_quiz_frame.show_question(self, self.question_no+1)
+                    )
+            )
 
     def submit_question(self):
         global questions, options, answers
@@ -923,7 +945,7 @@ class edit_quiz_frame(tk.Frame):
             ])
         answers.append(0)
         # Dump the new question to the json file
-        self.dump_quiz(questions, options, answers)
+        edit_quiz_frame.dump_quiz(self, questions, options, answers)
 
     def dump_quiz(self, questions, options, answers):
         # Format data in json format
@@ -948,6 +970,59 @@ class edit_quiz_frame(tk.Frame):
                 indent=4
             )
             f.truncate()  # Deletes extra data
+
+
+class delete_quiz_frame(tk.Frame):
+    quiz_title = ""
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.configure(bg=style.BACKGROUND_COLOR)
+        # Widget Setup
+        label = tk.Label(
+            self, text="ARE YOU SURE YOU WANT TO DELETE THIS QUIZ?",
+            font=(style.DEFAULT_FONT, 22), bg=style.BACKGROUND_COLOR
+        )
+        yes_button = tk.Button(
+            self, text="Yes", font=(style.DEFAULT_FONT, 18), width=15,
+            bd=0, bg=style.RED_BUTTON, activebackground=style.ACTIVE_RED,
+            command=lambda: [
+                os.remove(
+                    "dependencies//quizzes//{title}"
+                    .format(title=self.quiz_title)
+                ),
+                controller.show_frame(load_quiz_frame),
+                load_quiz_frame.quiz_selector(
+                    load_quiz_frame, delete_quiz_frame, controller
+                ),
+                self.deleted_message()
+            ]
+        )
+        no_button = tk.Button(
+            self, text="Cancel", font=(style.DEFAULT_FONT, 18), width=15,
+            bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
+            command=lambda: [
+                controller.show_frame(load_quiz_frame),
+                load_quiz_frame.quiz_selector(
+                    load_quiz_frame, delete_quiz_frame, controller
+                )
+            ]
+        )
+        # Pack everything
+        label.pack(fill="x", pady=150)
+        yes_button.pack(pady=20)
+        no_button.pack()
+
+    def deleted_message(self):
+        # Deleted message (Message to user that the quiz has been deleted)
+        self.deleted_label = tk.Label(
+            text="Quiz successfully deleted", font=(style.DEFAULT_FONT, 20),
+            bg=style.GREEN_BUTTON
+        )
+        self.deleted_label.place(relx=0.5, rely=0.5, anchor="center"),
+        self.deleted_label.after(
+            2000, lambda: self.deleted_label.destroy()
+            )
 
 
 # Run mainloop
