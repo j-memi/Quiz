@@ -922,6 +922,17 @@ class edit_quiz_frame(tk.Frame):
             edit_quiz_frame.option3_entry.get(),
             edit_quiz_frame.option4_entry.get()
             ]
+        answer = edit_quiz_frame.correct_option_entry.get()
+        if answer not in ["1", "2", "3", "4"]:
+            # Display an indication that the question answer is invalid
+            info_label = tk.Label(
+                text="Invalid Correct Option. Use 1, 2, 3, or 4",
+                bg=style.RED_BUTTON, font=(style.DEFAULT_FONT, 18),
+                padx=10, pady=10
+            )
+            info_label.place(relx=0.5, rely=0.5, anchor="center")
+            info_label.after(2000, lambda: info_label.destroy())
+            return None
         answers[self.question_no] = int(
             edit_quiz_frame.correct_option_entry.get()
             )-1
@@ -930,7 +941,8 @@ class edit_quiz_frame(tk.Frame):
         # Display an indication that the question has been updated
         info_label = tk.Label(
             text="Question updated", bg=style.GREEN_BUTTON,
-            font=(style.DEFAULT_FONT, 18)
+            font=(style.DEFAULT_FONT, 18),
+            padx=10, pady=10
         )
         info_label.place(relx=0.5, rely=0.5, anchor="center")
         info_label.after(1000, lambda: info_label.destroy())
