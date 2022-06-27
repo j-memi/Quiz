@@ -648,7 +648,19 @@ class create_quiz_frame(tk.Frame):
     def create_quiz(self, controller):
         create_quiz_frame.title_entry.unbind("<Return>")
         # Get the title from user from the title entry box
-        title = self.title_entry.get().lower().replace(" ", "_")
+        title = self.title_entry.get().lower().strip().replace(" ", "_")
+        # Checks if the title is valid
+        if len(title) > 30 or title == "":
+            # Display an indication that the title is invalid
+            info_label = tk.Label(
+                text="Invalid Quiz Title",
+                bg=style.RED_BUTTON, font=(style.DEFAULT_FONT, 18),
+                padx=10, pady=10
+            )
+            info_label.place(relx=0.5, rely=0.5, anchor="center")
+            info_label.after(2000, lambda: info_label.destroy())
+            self.rebind_return(controller)
+            return None
         try:
             # Create new json file with the title
             open(
