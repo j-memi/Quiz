@@ -1,7 +1,8 @@
-import tkinter as tk
-import os
 import json
+import os
 import random
+import tkinter as tk
+
 import style
 
 
