@@ -1,7 +1,11 @@
+# Quiz Maker with simple GUI.
+
 import json
 import os
 import random
 import tkinter as tk
+# Import search function from Regular Expressions
+from re import search
 
 import style
 
@@ -608,6 +612,7 @@ class create_quiz_frame(tk.Frame):
             self, bg=style.BACKGROUND_COLOR,
             text=(
                 "Maximum of 30 characters\nThe title cannot be empty\n"
+                "Some characters are not allowed due to filename limitations\n"
                 "THE TITLE CANNOT BE CHANGED LATER"
                 ),
             font=(style.DEFAULT_FONT, 18), justify="center"
@@ -651,7 +656,8 @@ class create_quiz_frame(tk.Frame):
         # Get the title from user from the title entry box
         title = self.title_entry.get().lower().strip().replace(" ", "_")
         # Checks if the title is valid
-        if len(title) > 30 or title == "":
+        invalid_characters = r'\/|\<|\>|\:|\\|\?|\*|\||\"'
+        if len(title) > 30 or title == "" or search(invalid_characters, title):
             # Display an indication that the title is invalid
             info_label = tk.Label(
                 text="Invalid Quiz Title",
