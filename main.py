@@ -10,6 +10,7 @@ from re import search
 import style
 
 
+# Main App class
 class quiz_app(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
@@ -84,11 +85,12 @@ class quiz_app(tk.Tk):
         info_label.after(int(sec*1000), lambda: info_label.destroy())
 
 
-# ---------- Code for Title Screen ----------
+# Title Page
 class title_frame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.configure(bg=style.BACKGROUND_COLOR)
+        # Widget Setup
         welcome = tk.Frame(self, bg=style.BACKGROUND_COLOR)
         heading = tk.Label(
             master=welcome, text="Welcome!", font=(style.DEFAULT_FONT, 32),
@@ -101,6 +103,7 @@ class title_frame(tk.Frame):
             font=(style.DEFAULT_FONT, 24), bg=style.BACKGROUND_COLOR
             )
         buttons = tk.Frame(self, bg=style.BACKGROUND_COLOR)
+        # Shows Quiz Creator/Editor Frame
         create_button = tk.Button(
             master=buttons, text="Create/Edit Quiz", width=12,
             padx=90, pady=80,
@@ -108,6 +111,7 @@ class title_frame(tk.Frame):
             font=(style.DEFAULT_FONT, 40),
             command=lambda: controller.show_frame(create_edit_quiz_frame)
         )
+        # Shows Load Quiz Frame
         load_button = tk.Button(
             master=buttons, text="Load Quiz", width=12, padx=90, pady=80,
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
@@ -128,7 +132,7 @@ class title_frame(tk.Frame):
         buttons.grid(row=1, column=0, sticky="ew")
 
 
-# ---------- Code for Load Quiz Screen ----------
+# Page to select a quiz from list of buttons
 class load_quiz_frame(tk.Frame):
     global quiz_list
     global questions
@@ -141,12 +145,11 @@ class load_quiz_frame(tk.Frame):
         self.configure(bg=style.BACKGROUND_COLOR)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        # Heading
+        # Widget Setup
         heading = tk.Label(
             self, text="Select a quiz",
             font=(style.DEFAULT_FONT, 32), width=100, bg=style.BACKGROUND_COLOR
             )
-        # Back button
         back_button = tk.Button(
             self, text="Back", width=18,
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
@@ -166,6 +169,7 @@ class load_quiz_frame(tk.Frame):
             sticky="ew", padx=200, pady=50
             )
 
+    # Creates scrollable canvas with buttons that correspond to each quiz
     def quiz_selector(self, frame, controller):
         # Set up canvas and scrollbar for the quiz selector
         self.canvas_container = tk.Canvas(
@@ -207,7 +211,6 @@ class load_quiz_frame(tk.Frame):
             )
             button_border.pack(fill="x")
             button.pack(fill="x")
-
         # Updates the frame
         options.update()
         # Sets up the scrollbar for how many things are in the quiz selector
@@ -219,9 +222,9 @@ class load_quiz_frame(tk.Frame):
         self.canvas_container.pack(side="left")
         self.scrollbar.pack(side="left", fill="y", anchor="e")
 
+    # Based on which page the quiz selector goes to, uses the title of the
+    # chosen quiz for different purposes
     def load_edit_quiz(self, frame, title, controller):
-        # Calls different functions depending on which frame the quiz selector
-        # buttons go to
         if frame == edit_quiz_frame:
             edit_quiz_frame.edit_quiz(
                 edit_quiz_frame, title.replace(".json", ""), controller
@@ -229,6 +232,7 @@ class load_quiz_frame(tk.Frame):
         if frame == delete_quiz_frame:
             delete_quiz_frame.quiz_title = title  # Set class variable to title
 
+    # Loads the selected quiz into global lists
     def load_quiz(self, quiz_no, controller, randomize=False):
         global questions, options, answers, score
         questions = []
@@ -248,7 +252,7 @@ class load_quiz_frame(tk.Frame):
             quiz_info_frame.info_label.configure(
                 text="Total {} questions".format(len(quiz_info["questions"]))
                 )
-            # Puts questions in random order
+            # Puts questions in random order if randomize is True
             if randomize:
                 random.shuffle(quiz_info["questions"])
             # For each question shuffle options and append to the lists
@@ -265,6 +269,7 @@ class load_quiz_frame(tk.Frame):
                 questions.append(quiz_info["questions"][i]["question"])
                 options.append(quiz_info["questions"][i]["options"])
                 answers.append(answer)
+        # If selected file is not found
         except FileNotFoundError:
             error = tk.Frame(quiz_app, bg=style.BACKGROUND_COLOR)
             error_label = tk.Label(
@@ -284,6 +289,7 @@ class load_quiz_frame(tk.Frame):
             error_label.place(relx=0.5, rely=0.4, anchor="center")
             back_button.place(relx=0.5, rely=0.6, anchor="center")
             error.grid(row=0, column=0, sticky="nsew")
+        # If selected file is not in json format
         except json.decoder.JSONDecodeError:
             error = tk.Frame(quiz_app, bg=style.BACKGROUND_COLOR)
             error_label = tk.Label(
@@ -309,12 +315,12 @@ class load_quiz_frame(tk.Frame):
             error.grid(row=0, column=0, sticky="nsew")
 
 
-# ---------- Code for Quiz Info Screen ----------
+# Page showing how many questions in the quiz
 class quiz_info_frame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.configure(bg=style.BACKGROUND_COLOR)
-
+        # Widget Setup
         quiz_info_frame.title_label = tk.Label(
             self, text="title", wraplength=1100, width=45,
             font=(style.DEFAULT_FONT, 32), bg=style.BACKGROUND_COLOR
@@ -328,7 +334,13 @@ class quiz_info_frame(tk.Frame):
             self, text="Start",
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 18),
-            command=lambda: quiz_frame.start_quiz(quiz_frame, controller)
+            command=lambda: [
+                controller.show_frame(quiz_frame),
+                quiz_frame.reset_quiz(quiz_frame),
+                quiz_frame.score_label.configure(
+                    text="Your Score: {}".format(score)
+                    )
+            ]
         )
         back_button = tk.Button(
             self, text="Back",
@@ -337,7 +349,8 @@ class quiz_info_frame(tk.Frame):
             command=lambda: [
                 controller.show_frame(load_quiz_frame),
                 load_quiz_frame.quiz_selector(
-                    load_quiz_frame, quiz_info_frame, controller)
+                    load_quiz_frame, quiz_info_frame, controller
+                    )
             ]
         )
         # Pack everything
@@ -351,7 +364,7 @@ class quiz_info_frame(tk.Frame):
         back_button.grid(row=3, column=1, sticky="ew", pady=60)
 
 
-# ---------- Code for Quiz Screen ----------
+# The main quiz page
 class quiz_frame(tk.Frame):
     global questions, options, answers, score
 
@@ -440,8 +453,8 @@ class quiz_frame(tk.Frame):
         options_frame.pack(fill="both", expand=True, padx=15)
         bottom_frame.pack(fill="x", padx=20)
 
-    def start_quiz(self, controller):
-        controller.show_frame(quiz_frame)
+    # Reset quiz UI
+    def reset_quiz(self):
         quiz_frame.question_label.configure(text=questions[0])
         quiz_frame.option1.configure(
             text=options[0][0], bg=style.BLUE_BUTTON, state="normal"
@@ -456,15 +469,17 @@ class quiz_frame(tk.Frame):
             text=options[0][3], bg=style.BLUE_BUTTON, state="normal"
             )
         quiz_frame.skip_next_button.configure(text="Skip")
-        quiz_frame.score_label.configure(text="Your Score: {}".format(score))
 
+    # Checks user answer
     def check_answer(self, answer):
         global score
+        # Disables option buttons because the user has already answered
         quiz_frame.option1.configure(state="disabled")
         quiz_frame.option2.configure(state="disabled")
         quiz_frame.option3.configure(state="disabled")
         quiz_frame.option4.configure(state="disabled")
         quiz_frame.skip_next_button.configure(text="Next")
+        # If answer correct, change the selected box green
         if answer == answers[0]:
             score += 1
             if answer == 0:
@@ -475,6 +490,7 @@ class quiz_frame(tk.Frame):
                 quiz_frame.option3.configure(bg=style.GREEN_BUTTON)
             elif answer == 3:
                 quiz_frame.option4.configure(bg=style.GREEN_BUTTON)
+        # If answer incorrect, change correct to green and selected to red
         else:
             if answer == 0:
                 quiz_frame.option1.configure(bg=style.RED_BUTTON)
@@ -492,46 +508,39 @@ class quiz_frame(tk.Frame):
                 quiz_frame.option3.configure(bg=style.GREEN_BUTTON)
             elif answers[0] == 3:
                 quiz_frame.option4.configure(bg=style.GREEN_BUTTON)
+        # Updates score label
         quiz_frame.score_label.configure(text="Your Score: {}".format(score))
         quiz_frame.update(self)
 
+    # Show next question
     def next_question(self, controller):
         try:
+            # Deletes current question and shows the new question
             questions.pop(0)
             answers.pop(0)
             options.pop(0)
-            quiz_frame.question_label.configure(text=questions[0])
-            quiz_frame.option1.configure(
-                text=options[0][0], bg=style.BLUE_BUTTON, state="normal"
-                )
-            quiz_frame.option2.configure(
-                text=options[0][1], bg=style.BLUE_BUTTON, state="normal"
-                )
-            quiz_frame.option3.configure(
-                text=options[0][2], bg=style.BLUE_BUTTON, state="normal"
-                )
-            quiz_frame.option4.configure(
-                text=options[0][3], bg=style.BLUE_BUTTON, state="normal"
-                )
-            quiz_frame.skip_next_button.configure(text="Skip")
+            quiz_frame.reset_quiz(quiz_frame)
         except IndexError:
+            # If no more questions, finish quiz
             quiz_frame.finish_quiz(quiz_frame, controller)
 
+    # Show finish frame and shows the score
     def finish_quiz(self, controller):
-        # Show finish frame and shows the score
         controller.show_frame(finish_frame)
         finish_frame.final_score_label.configure(
             text="Your Final Score is: {}\n Well Done :)".format(score)
             )
 
 
-# ---------- Code for Finish Screen ----------
+# End screen after quiz is complete
 class finish_frame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.configure(bg=style.BACKGROUND_COLOR)
+        self.rowconfigure(0, weight=4)
+        self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
-
+        # Widget Setup
         finish_frame.final_score_label = tk.Label(
             self, text="score", wraplength=1100, width=45,
             font=(style.DEFAULT_FONT, 32), bg=style.BACKGROUND_COLOR
@@ -542,18 +551,16 @@ class finish_frame(tk.Frame):
             command=lambda: controller.show_frame(title_frame)
         )
         # Pack everything
-        finish_frame.final_score_label.grid(
-            row=0, column=0, sticky="ew", pady=60
-            )
-        title_button.grid(row=1, column=0, sticky="ew", pady=60, padx=20)
+        finish_frame.final_score_label.grid(row=0, column=0, sticky="nsew")
+        title_button.grid(row=1, column=0, sticky="ew", padx=50)
 
 
-# ---------- Code for Create/Edit Quiz Screen ----------
+# Shows Create/Edit Quiz Features Page
 class create_edit_quiz_frame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.configure(bg=style.BACKGROUND_COLOR)
-
+        # Widget Setup
         buttons_frame = tk.Frame(self, bg=style.BACKGROUND_COLOR)
         title_button = tk.Button(
             self, text="Back to Title", font=(style.DEFAULT_FONT, 18),
@@ -603,7 +610,7 @@ class create_edit_quiz_frame(tk.Frame):
         title_button.pack(side="bottom", fill="x", padx=50, pady=50)
 
 
-# ---------- Code for Create Quiz Screen ----------
+# Quiz creation page
 class create_quiz_frame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -612,8 +619,7 @@ class create_quiz_frame(tk.Frame):
             [0, 1, 2, 3], weight=1, uniform="create_quiz"
             )
         self.rowconfigure([0, 1, 2], weight=1)
-
-        # Tkinter Widgets
+        # Widget Setup
         heading_label = tk.Label(
             self, text="Create a new quiz", font=(style.DEFAULT_FONT, 32),
             bg=style.BACKGROUND_COLOR
@@ -646,7 +652,6 @@ class create_quiz_frame(tk.Frame):
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             command=lambda: controller.show_frame(create_edit_quiz_frame)
         )
-
         # Pack everything
         heading_label.grid(row=0, column=0, columnspan=4, sticky="ew", pady=20)
         instructions_label.grid(row=1, column=1, columnspan=2, sticky="ew")
@@ -661,21 +666,25 @@ class create_quiz_frame(tk.Frame):
             row=4, column=0, columnspan=4, sticky="ew", padx=50, pady=50
             )
 
+    # Creates a new json file using the title from the user input
     def create_quiz(self, controller):
         create_quiz_frame.title_entry.unbind("<Return>")
         # Get the title from user from the title entry box
         title = self.title_entry.get().lower().strip().replace(" ", "_")
         # Checks if the title is valid
         invalid_characters = r'\/|\<|\>|\:|\\|\?|\*|\||\"'
-        if len(title) > 30 or title == "" or search(invalid_characters, title):
-            # Display an indication that the title is invalid
-            info_label = tk.Label(
-                text="Invalid Quiz Title",
-                bg=style.RED_BUTTON, font=(style.DEFAULT_FONT, 18),
-                padx=10, pady=10
-            )
-            info_label.place(relx=0.5, rely=0.5, anchor="center")
-            info_label.after(2000, lambda: info_label.destroy())
+        if len(title) > 30:
+            text = "Over 30 character limit"
+            invalid = True
+        elif title == "":
+            text = "Title cannot be empty"
+            invalid = True
+        elif search(invalid_characters, title):
+            text = "Invalid characters"
+            invalid = True
+        # Display an indication that the title is invalid
+        if invalid:
+            quiz_app.info_label(quiz_app, text, 2, style.RED_BUTTON)
             self.rebind_return(controller)
             return None
         try:
@@ -759,6 +768,7 @@ class create_quiz_frame(tk.Frame):
                 )
             self.cancel_button.place(relx=0.7, rely=0.6, anchor="center")
 
+    # Destroys the error box
     def destroy_error_label(self):
         self.error_label.destroy()
         self.edit_quiz_button.destroy()
@@ -768,6 +778,7 @@ class create_quiz_frame(tk.Frame):
         create_quiz_frame.submit_button.configure(state="normal")
         create_quiz_frame.back_button.configure(state="normal")
 
+    # Binds return key on title_entry to create quiz
     def rebind_return(controller):
         create_quiz_frame.title_entry.bind(
             "<Return>", lambda e: create_quiz_frame.create_quiz(
@@ -776,7 +787,7 @@ class create_quiz_frame(tk.Frame):
         )
 
 
-# ---------- Code for Edit Quiz Screen ----------
+# Quiz Editor Page
 class edit_quiz_frame(tk.Frame):
     question_no = 0
     title = ""
@@ -789,7 +800,7 @@ class edit_quiz_frame(tk.Frame):
         self.columnconfigure([0, 3], weight=1)
         self.columnconfigure([1, 2], weight=2)
         self.rowconfigure([0, 1, 2, 3, 4], weight=1)
-        # Page layout
+        # Widget Setup
         text_attributes = {
             "font": f"{style.DEFAULT_FONT} 18",
             "justify": "center"
@@ -889,6 +900,7 @@ class edit_quiz_frame(tk.Frame):
             row=4, column=0, sticky="ew", padx=15, pady=10, ipady=5
             )
 
+    # Loads the selected quiz to the quiz editor
     def edit_quiz(self, title, controller):
         # Updates the class variables
         self.title = title
@@ -907,8 +919,9 @@ class edit_quiz_frame(tk.Frame):
         else:
             self.show_question(self, edit_quiz_frame.question_no)
 
+    # Shows the corresponding question with the question_no
     def show_question(self, question_no):
-        # Deletes current question from quiz if it is new and not saved
+        # Deletes question from quiz if it is new and not saved
         if edit_quiz_frame.not_saved is True:
             questions.pop(edit_quiz_frame.question_no)
             options.pop(edit_quiz_frame.question_no)
@@ -935,11 +948,12 @@ class edit_quiz_frame(tk.Frame):
         edit_quiz_frame.option4_entry.insert(0, options[question_no][3])
         edit_quiz_frame.correct_option_entry.delete(0, "end")
         edit_quiz_frame.correct_option_entry.insert(0, answers[question_no]+1)
-        # Disable previous and next buttons if at the start or end of the quiz
+        # Disable previous button if at the start of quiz
         if question_no == 0:
             edit_quiz_frame.previous_button.configure(state="disabled")
         else:
             edit_quiz_frame.previous_button.configure(state="normal")
+        # Change next button to new question button when at the end of quiz
         if question_no == len(questions)-1:
             edit_quiz_frame.next_button.configure(
                 text="New Question",
@@ -957,20 +971,17 @@ class edit_quiz_frame(tk.Frame):
                     )
             )
 
+    # Takes user input from entry boxes and saves it
     def submit_question(self):
         global questions, options, answers
         # Update the questions, options, and answers lists
-        print(edit_quiz_frame.question_no)
         answer = edit_quiz_frame.correct_option_entry.get()
+        # Display an indication if the question answer is invalid
         if answer not in ["1", "2", "3", "4"]:
-            # Display an indication that the question answer is invalid
-            info_label = tk.Label(
-                text="Invalid Correct Option. Use 1, 2, 3, or 4",
-                bg=style.RED_BUTTON, font=(style.DEFAULT_FONT, 18),
-                padx=10, pady=10
-            )
-            info_label.place(relx=0.5, rely=0.5, anchor="center")
-            info_label.after(2000, lambda: info_label.destroy())
+            quiz_app.info_label(
+                quiz_app, "Invalid Correct Option. Use 1, 2, 3, or 4",
+                2, style.RED_BUTTON
+                )
             return None
         answers[edit_quiz_frame.question_no] = int(answer)-1
         questions[edit_quiz_frame.question_no] = (
@@ -991,6 +1002,7 @@ class edit_quiz_frame(tk.Frame):
         # Change class variable to show the question is saved
         edit_quiz_frame.not_saved = False
 
+    # Adds a new question
     def new_question(self):
         global questions, options, answers
         # Append a new question to the json file
@@ -1000,7 +1012,6 @@ class edit_quiz_frame(tk.Frame):
             "Enter option 3 here", "Enter option 4 here"
             ])
         answers.append(0)
-        print("question appended")
         # Make entries clear on click
         self.clear_entry_on_click(edit_quiz_frame.question_entry)
         self.clear_entry_on_click(edit_quiz_frame.option1_entry)
@@ -1008,7 +1019,7 @@ class edit_quiz_frame(tk.Frame):
         self.clear_entry_on_click(edit_quiz_frame.option3_entry)
         self.clear_entry_on_click(edit_quiz_frame.option4_entry)
         self.clear_entry_on_click(edit_quiz_frame.correct_option_entry)
-        # Show the new question
+        # Show the new question. Can only add 1 new question at a time
         if edit_quiz_frame.not_saved is False:
             edit_quiz_frame.show_question(self, edit_quiz_frame.question_no+1)
         else:
@@ -1016,6 +1027,7 @@ class edit_quiz_frame(tk.Frame):
         # Set not_saved to true
         edit_quiz_frame.not_saved = True
 
+    # Makes entry widgets delete everything inside when clicked on
     def clear_entry_on_click(entry):
         entry.bind(
             "<Button-1>", lambda e: [
@@ -1024,6 +1036,7 @@ class edit_quiz_frame(tk.Frame):
             ]
         )
 
+    # Saves the quiz data to the json file in the correct format
     def dump_quiz(self, questions, options, answers):
         # Format data in json format
         data = {
@@ -1049,6 +1062,7 @@ class edit_quiz_frame(tk.Frame):
             f.truncate()  # Deletes extra data
 
 
+# Page shown to confirm user wants to delete a quiz
 class delete_quiz_frame(tk.Frame):
     quiz_title = ""
 
@@ -1072,8 +1086,13 @@ class delete_quiz_frame(tk.Frame):
                 load_quiz_frame.quiz_selector(
                     load_quiz_frame, delete_quiz_frame, controller
                 ),
-                self.deleted_message()
-            ]
+                # Message to user that the quiz has been deleted
+                quiz_app.info_label(
+                    quiz_app,
+                    f"{delete_quiz_frame.quiz_title} Successfully Deleted",
+                    1.5, style.GREEN_BUTTON
+                    )
+                ]
         )
         no_button = tk.Button(
             self, text="Cancel", font=(style.DEFAULT_FONT, 18), width=15,
@@ -1090,15 +1109,8 @@ class delete_quiz_frame(tk.Frame):
         yes_button.pack(pady=20)
         no_button.pack()
 
-    def deleted_message(self):
-        # Deleted message (Message to user that the quiz has been deleted)
-        quiz_app.info_label(
-            quiz_app, f"{delete_quiz_frame.quiz_title} Successfully Deleted",
-            1.5, style.GREEN_BUTTON
-            )
 
-
-# Run mainloop
+# Run the app
 if __name__ == "__main__":
     app = quiz_app()
     app.mainloop()
