@@ -30,7 +30,6 @@ class quiz_app(tk.Tk):
 
         # Initializing frames to an array
         self.frames = {}
-
         for F in (
             title_frame,
             load_quiz_frame,
@@ -42,11 +41,12 @@ class quiz_app(tk.Tk):
             quiz_frame,
             finish_frame
         ):
-            # Create a frame for each frame in the array and grid it
+            # Create a frame for each item in the array and grid it
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
+        # Shows the title frame
         self.show_frame(title_frame)
 
     # Show the frame with the given frame name
@@ -72,6 +72,16 @@ class quiz_app(tk.Tk):
             print("File is not in JSON format")
             quiz_list = []
             return quiz_list
+
+    # Used to show popup info labels that will disappear after x seconds
+    def info_label(self, text, sec, color):
+        info_label = tk.Label(
+            text=text, bg=color,
+            font=(style.DEFAULT_FONT, 18),
+            padx=10, pady=10
+        )
+        info_label.place(relx=0.5, rely=0.5, anchor="center")
+        info_label.after(int(sec*1000), lambda: info_label.destroy())
 
 
 # ---------- Code for Title Screen ----------
@@ -673,29 +683,26 @@ class create_quiz_frame(tk.Frame):
             open(
                 "dependencies//quizzes//{title}.json".format(title=title), "x"
             )
-            # Open the new json file and write the title to it
+            # Open the new json file and set up quiz information
             with open(
                 "dependencies//quizzes//{title}.json".format(title=title), "w"
             ) as f:
                 json.dump({
                     "title": title,
-                    "questions": [
-                        {
-                            "question": "Enter question here",
-                            "options": [
-                                "Enter option 1 here", "Enter option 2 here",
-                                "Enter option 3 here", "Enter option 4 here"
-                                ],
-                            "answer": 0
-                        }
-                    ]
+                    "questions": []
                     }, f, indent=4)
+            global questions, options, answers
+            questions = []
+            options = []
+            answers = []
             # Show the edit quiz frame
             edit_quiz_frame.edit_quiz(edit_quiz_frame, title, controller)
+            edit_quiz_frame.question_no = -1
+            edit_quiz_frame.new_question(edit_quiz_frame)
             controller.show_frame(edit_quiz_frame)
         except FileExistsError:
             # Show error message if file already exists with buttons to
-            # overwrite or edit the quiz with the same name
+            # edit or overwrite the quiz with the same name
             self.title_entry.configure(state="disabled")
             create_quiz_frame.submit_button.configure(state="disabled")
             create_quiz_frame.back_button.configure(state="disabled")
@@ -773,6 +780,7 @@ class create_quiz_frame(tk.Frame):
 class edit_quiz_frame(tk.Frame):
     question_no = 0
     title = ""
+    not_saved = False
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -831,7 +839,7 @@ class edit_quiz_frame(tk.Frame):
             **text_attributes, bg=style.BACKGROUND_COLOR
         )
         edit_quiz_frame.save_button = tk.Button(
-            self, text="Save", **text_attributes,
+            self, text="Save Question", **text_attributes,
             bd=0, bg=style.GREEN_BUTTON, activebackground=style.ACTIVE_GREEN,
             command=lambda: self.submit_question()
         )
@@ -882,10 +890,9 @@ class edit_quiz_frame(tk.Frame):
             )
 
     def edit_quiz(self, title, controller):
-        global questions, options, answers
         # Updates the class variables
         self.title = title
-        self.question_no = 0
+        edit_quiz_frame.question_no = 0
         # Loads selected quiz
         quiz_list = quiz_app.get_quizzes()
         quiz_no = quiz_list.index("{title}.json".format(title=title))
@@ -894,11 +901,24 @@ class edit_quiz_frame(tk.Frame):
             quiz_no,
             controller
             )
-        self.show_question(self, self.question_no)
+        # Does not show question if there are no questions to show
+        if questions == []:
+            pass
+        else:
+            self.show_question(self, edit_quiz_frame.question_no)
 
     def show_question(self, question_no):
+        # Deletes current question from quiz if it is new and not saved
+        if edit_quiz_frame.not_saved is True:
+            questions.pop(edit_quiz_frame.question_no)
+            options.pop(edit_quiz_frame.question_no)
+            answers.pop(edit_quiz_frame.question_no)
+            quiz_app.info_label(
+                quiz_app, "Unsaved question deleted.", 1, style.RED_BUTTON
+                )
+            edit_quiz_frame.not_saved = False
         # Change class variable to the passed in argument question_no
-        self.question_no = question_no
+        edit_quiz_frame.question_no = question_no
         # Show the corresponding question and options
         edit_quiz_frame.question_label.configure(
             text="Question {question_no}".format(question_no=question_no+1)
@@ -924,30 +944,23 @@ class edit_quiz_frame(tk.Frame):
             edit_quiz_frame.next_button.configure(
                 text="New Question",
                 bg=style.GREEN_BUTTON, activebackground=style.ACTIVE_GREEN,
-                command=lambda: [
-                    edit_quiz_frame.new_question(self),
-                    edit_quiz_frame.show_question(self, self.question_no+1)
-                    ]
+                command=lambda: edit_quiz_frame.new_question(edit_quiz_frame)
                 )
         else:
             edit_quiz_frame.next_button.configure(
                 text="Next Question",
                 bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
                 command=lambda: (
-                    edit_quiz_frame.show_question(self, self.question_no+1)
+                    edit_quiz_frame.show_question(
+                        self, edit_quiz_frame.question_no+1
+                        )
                     )
             )
 
     def submit_question(self):
         global questions, options, answers
         # Update the questions, options, and answers lists
-        questions[self.question_no] = edit_quiz_frame.question_entry.get()
-        options[self.question_no] = [
-            edit_quiz_frame.option1_entry.get(),
-            edit_quiz_frame.option2_entry.get(),
-            edit_quiz_frame.option3_entry.get(),
-            edit_quiz_frame.option4_entry.get()
-            ]
+        print(edit_quiz_frame.question_no)
         answer = edit_quiz_frame.correct_option_entry.get()
         if answer not in ["1", "2", "3", "4"]:
             # Display an indication that the question answer is invalid
@@ -959,17 +972,24 @@ class edit_quiz_frame(tk.Frame):
             info_label.place(relx=0.5, rely=0.5, anchor="center")
             info_label.after(2000, lambda: info_label.destroy())
             return None
-        answers[self.question_no] = int(answer)-1
+        answers[edit_quiz_frame.question_no] = int(answer)-1
+        questions[edit_quiz_frame.question_no] = (
+            edit_quiz_frame.question_entry.get()
+        )
+        options[edit_quiz_frame.question_no] = [
+            edit_quiz_frame.option1_entry.get(),
+            edit_quiz_frame.option2_entry.get(),
+            edit_quiz_frame.option3_entry.get(),
+            edit_quiz_frame.option4_entry.get()
+            ]
         # Calls dump_quiz function to update the quiz
         self.dump_quiz(questions, options, answers)
         # Display an indication that the question has been updated
-        info_label = tk.Label(
-            text="Question updated", bg=style.GREEN_BUTTON,
-            font=(style.DEFAULT_FONT, 18),
-            padx=10, pady=10
-        )
-        info_label.place(relx=0.5, rely=0.5, anchor="center")
-        info_label.after(1000, lambda: info_label.destroy())
+        quiz_app.info_label(
+            quiz_app, "Question Updated", 1, style.GREEN_BUTTON
+            )
+        # Change class variable to show the question is saved
+        edit_quiz_frame.not_saved = False
 
     def new_question(self):
         global questions, options, answers
@@ -980,8 +1000,29 @@ class edit_quiz_frame(tk.Frame):
             "Enter option 3 here", "Enter option 4 here"
             ])
         answers.append(0)
-        # Dump the new question to the json file
-        edit_quiz_frame.dump_quiz(self, questions, options, answers)
+        print("question appended")
+        # Make entries clear on click
+        self.clear_entry_on_click(edit_quiz_frame.question_entry)
+        self.clear_entry_on_click(edit_quiz_frame.option1_entry)
+        self.clear_entry_on_click(edit_quiz_frame.option2_entry)
+        self.clear_entry_on_click(edit_quiz_frame.option3_entry)
+        self.clear_entry_on_click(edit_quiz_frame.option4_entry)
+        self.clear_entry_on_click(edit_quiz_frame.correct_option_entry)
+        # Show the new question
+        if edit_quiz_frame.not_saved is False:
+            edit_quiz_frame.show_question(self, edit_quiz_frame.question_no+1)
+        else:
+            edit_quiz_frame.show_question(self, edit_quiz_frame.question_no)
+        # Set not_saved to true
+        edit_quiz_frame.not_saved = True
+
+    def clear_entry_on_click(entry):
+        entry.bind(
+            "<Button-1>", lambda e: [
+                entry.delete(0, "end"),
+                entry.unbind("<Button-1>")
+            ]
+        )
 
     def dump_quiz(self, questions, options, answers):
         # Format data in json format
@@ -1051,13 +1092,9 @@ class delete_quiz_frame(tk.Frame):
 
     def deleted_message(self):
         # Deleted message (Message to user that the quiz has been deleted)
-        self.deleted_label = tk.Label(
-            text="Quiz successfully deleted", font=(style.DEFAULT_FONT, 20),
-            bg=style.GREEN_BUTTON
-        )
-        self.deleted_label.place(relx=0.5, rely=0.5, anchor="center"),
-        self.deleted_label.after(
-            2000, lambda: self.deleted_label.destroy()
+        quiz_app.info_label(
+            quiz_app, f"{delete_quiz_frame.quiz_title} Successfully Deleted",
+            1.5, style.GREEN_BUTTON
             )
 
 
