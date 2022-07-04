@@ -234,7 +234,6 @@ class load_quiz_frame(tk.Frame):
                             ),
                         self.canvas_container.destroy(),
                         self.scrollbar.destroy(),
-                        print(frame),
                         self.load_edit_quiz(self, frame, title, controller),
                         controller.show_frame(frame)
                     ]
@@ -822,6 +821,7 @@ class edit_quiz_frame(tk.Frame):
     question_no = 0
     title = ""
     not_saved = False
+    controller = ""
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -934,7 +934,9 @@ class edit_quiz_frame(tk.Frame):
     def edit_quiz(self, title, controller):
         # Updates the class variables
         self.title = title
+        self.controller = controller
         edit_quiz_frame.question_no = 0
+        edit_quiz_frame.not_saved = False
         # Loads selected quiz
         quiz_list = quiz_app.get_quizzes()
         quiz_no = quiz_list.index("{title}.json".format(title=title))
@@ -953,13 +955,56 @@ class edit_quiz_frame(tk.Frame):
     def show_question(self, question_no):
         # Deletes question from quiz if it is new and not saved
         if edit_quiz_frame.not_saved is True:
-            questions.pop(edit_quiz_frame.question_no)
-            options.pop(edit_quiz_frame.question_no)
-            answers.pop(edit_quiz_frame.question_no)
-            quiz_app.info_label(
-                quiz_app, "Unsaved question deleted.", 1, style.RED_BUTTON
+            # Let user confirm to delete unsaved question or cancel
+            frame = tk.Frame(
+                bg=style.BACKGROUND_COLOR
+            )
+            label = tk.Label(
+                frame, font=(style.DEFAULT_FONT, 20),
+                bg=style.BACKGROUND_COLOR,
+                text=(
+                    "The current question is unsaved. It will be deleted."
                 )
-            edit_quiz_frame.not_saved = False
+            )
+            confirm = tk.Button(
+                frame, text="Confirm", font=(style.DEFAULT_FONT, 18), width=15,
+                bd=0, bg=style.RED_BUTTON, activebackground=style.ACTIVE_RED
+            )
+            cancel = tk.Button(
+                frame,
+                text="Cancel",
+                font=(style.DEFAULT_FONT, 18),
+                width=15,
+                bd=0,
+                bg=style.BLUE_BUTTON,
+                activebackground=style.ACTIVE_BLUE,
+                command=lambda: frame.destroy()
+            )
+            # If first question is new and is not saved, it will not be deleted
+            if edit_quiz_frame.question_no == 0:
+                confirm.configure(
+                    command=lambda: [
+                        edit_quiz_frame.delete_question(self),
+                        frame.destroy()
+                        ]
+                    )
+            # Deletes question and shows previous question
+            else:
+                confirm.configure(
+                    command=lambda: [
+                        edit_quiz_frame.delete_question(self),
+                        frame.destroy(),
+                        edit_quiz_frame.show_question(
+                            edit_quiz_frame, edit_quiz_frame.question_no-1
+                            )
+                        ]
+                    )
+            frame.place(relheight=1, relwidth=1)
+            label.pack(fill="x", pady=150)
+            confirm.pack(pady=20)
+            cancel.pack()
+            return
+
         # Change class variable to the passed in argument question_no
         edit_quiz_frame.question_no = question_no
         # Show the corresponding question and options
@@ -999,6 +1044,35 @@ class edit_quiz_frame(tk.Frame):
                         self, edit_quiz_frame.question_no+1
                         )
                     )
+            )
+
+    # Deletes question from quiz
+    def delete_question(self):
+        # Delete from lists
+        questions.pop(edit_quiz_frame.question_no)
+        options.pop(edit_quiz_frame.question_no)
+        answers.pop(edit_quiz_frame.question_no)
+        # Reset bindings
+        edit_quiz_frame.question_entry.unbind("<Button-1>")
+        edit_quiz_frame.option1_entry.unbind("<Button-1>")
+        edit_quiz_frame.option2_entry.unbind("<Button-1>")
+        edit_quiz_frame.option3_entry.unbind("<Button-1>")
+        edit_quiz_frame.option4_entry.unbind("<Button-1>")
+        edit_quiz_frame.correct_option_entry.unbind("<Button-1>")
+        # Indication to user new unsaved question deleted
+        quiz_app.info_label(
+            quiz_app, "Unsaved question deleted.", 1, style.RED_BUTTON
+            )
+        edit_quiz_frame.not_saved = False
+        # Reloads questions
+        if edit_quiz_frame.question_no == 0:
+            return
+        quiz_list = quiz_app.get_quizzes()
+        quiz_no = quiz_list.index("{title}.json".format(title=self.title))
+        load_quiz_frame.load_quiz(
+            load_quiz_frame,
+            quiz_no,
+            self.controller
             )
 
     # Takes user input from entry boxes and saves it
