@@ -64,6 +64,18 @@ class quiz_app(tk.Tk):
             for i in range(len(quiz_info)):
                 quiz_list.append(quiz_info[i])
             quiz_list.sort()
+            # Remove quizzes with no questions
+            for i in range(len(quiz_list)):
+                quiz_info = open(
+                    "dependencies//quizzes//{}".format(quiz_list[i]),
+                    "r"
+                    )
+                quiz_info = json.load(quiz_info)
+                if quiz_info["questions"] == []:
+                    os.remove(
+                        "dependencies//quizzes//{title}"
+                        .format(title=quiz_list[i])
+                    )
             return quiz_list
         except FileNotFoundError:
             print("File not found")
@@ -150,7 +162,7 @@ class load_quiz_frame(tk.Frame):
             self, text="Select a quiz",
             font=(style.DEFAULT_FONT, 32), width=100, bg=style.BACKGROUND_COLOR
             )
-        back_button = tk.Button(
+        load_quiz_frame.back_button = tk.Button(
             self, text="Back", width=18,
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 18),
@@ -164,13 +176,30 @@ class load_quiz_frame(tk.Frame):
         heading.grid(row=0, column=0, sticky="new", pady=60)
         load_quiz_frame.container = tk.Frame(self, bg=style.BACKGROUND_COLOR)
         load_quiz_frame.container.grid(row=1, column=0, sticky="ns")
-        back_button.grid(
+        load_quiz_frame.back_button.grid(
             row=2, column=0,
             sticky="ew", padx=200, pady=50
             )
 
     # Creates scrollable canvas with buttons that correspond to each quiz
     def quiz_selector(self, frame, controller):
+        # Changes the back button to go to the previous frame
+        if frame == edit_quiz_frame or frame == delete_quiz_frame:
+            load_quiz_frame.back_button.configure(
+                command=lambda: [
+                    controller.show_frame(create_edit_quiz_frame),
+                    self.canvas_container.destroy(),
+                    self.scrollbar.destroy()
+                ]
+            )
+        elif frame == quiz_info_frame:
+            load_quiz_frame.back_button.configure(
+                command=lambda: [
+                    controller.show_frame(title_frame),
+                    self.canvas_container.destroy(),
+                    self.scrollbar.destroy()
+                ]
+            )
         # Set up canvas and scrollbar for the quiz selector
         self.canvas_container = tk.Canvas(
             self.container, width=900, height=480, bg="#DDDDDD"
@@ -205,6 +234,7 @@ class load_quiz_frame(tk.Frame):
                             ),
                         self.canvas_container.destroy(),
                         self.scrollbar.destroy(),
+                        print(frame),
                         self.load_edit_quiz(self, frame, title, controller),
                         controller.show_frame(frame)
                     ]
@@ -229,7 +259,7 @@ class load_quiz_frame(tk.Frame):
             edit_quiz_frame.edit_quiz(
                 edit_quiz_frame, title.replace(".json", ""), controller
                 )  # Opens the selected quiz to be edited
-        if frame == delete_quiz_frame:
+        elif frame == delete_quiz_frame:
             delete_quiz_frame.quiz_title = title  # Set class variable to title
 
     # Loads the selected quiz into global lists
@@ -271,7 +301,7 @@ class load_quiz_frame(tk.Frame):
                 answers.append(answer)
         # If selected file is not found
         except FileNotFoundError:
-            error = tk.Frame(quiz_app, bg=style.BACKGROUND_COLOR)
+            error = tk.Frame(bg=style.BACKGROUND_COLOR)
             error_label = tk.Label(
                 master=error, text="Unable to load quiz.\nQuiz not found.",
                 font=(style.DEFAULT_FONT, 32), bg=style.BACKGROUND_COLOR
@@ -288,10 +318,9 @@ class load_quiz_frame(tk.Frame):
             # Pack everything
             error_label.place(relx=0.5, rely=0.4, anchor="center")
             back_button.place(relx=0.5, rely=0.6, anchor="center")
-            error.grid(row=0, column=0, sticky="nsew")
         # If selected file is not in json format
         except json.decoder.JSONDecodeError:
-            error = tk.Frame(quiz_app, bg=style.BACKGROUND_COLOR)
+            error = tk.Frame(bg=style.BACKGROUND_COLOR)
             error_label = tk.Label(
                 master=error,
                 text=(
@@ -312,7 +341,6 @@ class load_quiz_frame(tk.Frame):
             # Pack everything
             error_label.place(relx=0.5, rely=0.4, anchor="center")
             back_button.place(relx=0.5, rely=0.6, anchor="center")
-            error.grid(row=0, column=0, sticky="nsew")
 
 
 # Page showing how many questions in the quiz
@@ -668,6 +696,7 @@ class create_quiz_frame(tk.Frame):
 
     # Creates a new json file using the title from the user input
     def create_quiz(self, controller):
+        invalid = False
         create_quiz_frame.title_entry.unbind("<Return>")
         # Get the title from user from the title entry box
         title = self.title_entry.get().lower().strip().replace(" ", "_")
@@ -707,6 +736,7 @@ class create_quiz_frame(tk.Frame):
             # Show the edit quiz frame
             edit_quiz_frame.edit_quiz(edit_quiz_frame, title, controller)
             edit_quiz_frame.question_no = -1
+            edit_quiz_frame.not_saved = False
             edit_quiz_frame.new_question(edit_quiz_frame)
             controller.show_frame(edit_quiz_frame)
         except FileExistsError:
@@ -1019,7 +1049,7 @@ class edit_quiz_frame(tk.Frame):
         self.clear_entry_on_click(edit_quiz_frame.option3_entry)
         self.clear_entry_on_click(edit_quiz_frame.option4_entry)
         self.clear_entry_on_click(edit_quiz_frame.correct_option_entry)
-        # Show the new question. Can only add 1 new question at a time
+        # Show the new question.  Can only add 1 new question at a time
         if edit_quiz_frame.not_saved is False:
             edit_quiz_frame.show_question(self, edit_quiz_frame.question_no+1)
         else:
