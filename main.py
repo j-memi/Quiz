@@ -226,12 +226,10 @@ class load_quiz_frame(tk.Frame):
                 )
             button_no = quiz_list.index(item)
             button = tk.Button(
-                master=button_border,
+                master=button_border, relief="flat",
                 text=item.replace(".json", "").replace("_", " ").title(),
-                width=58, wraplength=900,
-                font=(style.DEFAULT_FONT, 20),
+                width=58, wraplength=900, font=(style.DEFAULT_FONT, 20),
                 bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
-                relief="flat",
                 command=lambda button_no=button_no, title=item: [
                         self.load_quiz(
                             self, button_no, controller, randomize=True
@@ -656,7 +654,8 @@ class create_quiz_frame(tk.Frame):
             self, bg=style.BACKGROUND_COLOR,
             text=(
                 "Maximum of 30 characters\nThe title cannot be empty\n"
-                "Some characters are not allowed due to filename limitations\n"
+                '(/ \\ < > : * ? " |) are not allowed due to filename '
+                "limitations\n"
                 "THE TITLE CANNOT BE CHANGED LATER"
                 ),
             font=(style.DEFAULT_FONT, 18), justify="center"
@@ -709,7 +708,7 @@ class create_quiz_frame(tk.Frame):
             text = "Title cannot be empty"
             invalid = True
         elif search(invalid_characters, title):
-            text = "Invalid characters"
+            text = "Contains invalid characters"
             invalid = True
         # Display an indication that the title is invalid
         if invalid:
