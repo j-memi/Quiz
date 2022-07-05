@@ -17,10 +17,10 @@ class quiz_app(tk.Tk):
 
         # Set up the tk window
         self.title("Quiz")
-        self.resizable(False, False)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        self.state("zoomed")
+        self.geometry("1280x720")
+        self.minsize(1280, 720)
 
         # Main container
         container = tk.Frame(self)
@@ -102,6 +102,9 @@ class title_frame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.configure(bg=style.BACKGROUND_COLOR)
+        self.rowconfigure(0, weight=15)
+        self.rowconfigure(1, weight=20)
+        self.columnconfigure(0, weight=1, uniform="title_frame")
         # Widget Setup
         welcome = tk.Frame(self, bg=style.BACKGROUND_COLOR)
         heading = tk.Label(
@@ -115,6 +118,7 @@ class title_frame(tk.Frame):
             font=(style.DEFAULT_FONT, 24), bg=style.BACKGROUND_COLOR
             )
         buttons = tk.Frame(self, bg=style.BACKGROUND_COLOR)
+        buttons.columnconfigure([0, 1], weight=1, uniform="uniform_buttons")
         # Shows Quiz Creator/Editor Frame
         create_button = tk.Button(
             master=buttons, text="Create/Edit Quiz", width=12,
@@ -136,11 +140,11 @@ class title_frame(tk.Frame):
                 ]
             )
         # Pack everything
-        welcome.grid(row=0, column=0, sticky="ew", padx=18, pady=100)
+        welcome.grid(row=0, column=0)
         heading.pack()
         description.pack()
-        create_button.grid(row=0, column=0, sticky="ew", padx=106, pady=50)
-        load_button.grid(row=0, column=1, sticky="ew", padx=106, pady=50)
+        create_button.grid(row=0, column=0, padx=(buttons.winfo_width()*50, 0))
+        load_button.grid(row=0, column=1, padx=(0, buttons.winfo_width()*50))
         buttons.grid(row=1, column=0, sticky="ew")
 
 
@@ -173,7 +177,7 @@ class load_quiz_frame(tk.Frame):
             ]
         )
         # Pack everything
-        heading.grid(row=0, column=0, sticky="new", pady=60)
+        heading.grid(row=0, column=0, sticky="ew", pady=20)
         load_quiz_frame.container = tk.Frame(self, bg=style.BACKGROUND_COLOR)
         load_quiz_frame.container.grid(row=1, column=0, sticky="ns")
         load_quiz_frame.back_button.grid(
@@ -347,6 +351,7 @@ class quiz_info_frame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.configure(bg=style.BACKGROUND_COLOR)
+        self.columnconfigure(1, weight=1, uniform="quiz_info_frame")
         # Widget Setup
         quiz_info_frame.title_label = tk.Label(
             self, text="title", wraplength=1100, width=45,
@@ -358,7 +363,7 @@ class quiz_info_frame(tk.Frame):
             font=(style.DEFAULT_FONT, 24), bg=style.BACKGROUND_COLOR
         )
         start_button = tk.Button(
-            self, text="Start",
+            self, text="Start", width=30,
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 18),
             command=lambda: [
@@ -370,7 +375,7 @@ class quiz_info_frame(tk.Frame):
             ]
         )
         back_button = tk.Button(
-            self, text="Back",
+            self, text="Back", width=30,
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 18),
             command=lambda: [
@@ -381,14 +386,10 @@ class quiz_info_frame(tk.Frame):
             ]
         )
         # Pack everything
-        spacer1 = tk.Label(self)
-        spacer2 = tk.Label(self)
-        spacer1.grid(row=0, column=0, sticky="ew", padx=100)
-        spacer2.grid(row=0, column=2, sticky="ew", padx=100)
-        quiz_info_frame.title_label.grid(row=0, column=1, sticky="ew", pady=60)
-        quiz_info_frame.info_label.grid(row=1, column=1, sticky="ew", pady=60)
-        start_button.grid(row=2, column=1, sticky="ew")
-        back_button.grid(row=3, column=1, sticky="ew", pady=60)
+        quiz_info_frame.title_label.grid(row=0, column=1, pady=60)
+        quiz_info_frame.info_label.grid(row=1, column=1, pady=60)
+        start_button.grid(row=2, column=1)
+        back_button.grid(row=3, column=1, pady=60)
 
 
 # The main quiz page
@@ -437,18 +438,18 @@ class quiz_frame(tk.Frame):
             command=lambda: quiz_frame.check_answer(self, 2)
         )
         quiz_frame.option4 = tk.Button(
-            master=options_frame, text="option4", anchor="center",
+            options_frame, text="option4", anchor="center",
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             font=(style.DEFAULT_FONT, 18),
             command=lambda: quiz_frame.check_answer(self, 3)
         )
         quiz_frame.score_label = tk.Label(
-            master=bottom_frame, text="Your score: 0",
+            bottom_frame, text="Your score: 0",
             wraplength=1100, width=45,
             font=(style.DEFAULT_FONT, 28), bg=style.BACKGROUND_COLOR
         )
         quiz_frame.skip_next_button = tk.Button(
-            self, text="Skip", font=(style.DEFAULT_FONT, 18), width=10,
+            bottom_frame, text="Skip", font=(style.DEFAULT_FONT, 18), width=10,
             bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             command=lambda: quiz_frame.next_question(self, controller)
         )
@@ -475,10 +476,10 @@ class quiz_frame(tk.Frame):
             row=1, column=1, sticky="nsew", padx=10, pady=10
             )
         quiz_frame.score_label.grid(row=0, column=0, sticky="ew", pady=50)
-        quiz_frame.skip_next_button.place(x=1350, y=745)
+        quiz_frame.skip_next_button.grid(row=0, column=0, sticky="e")
         top_frame.pack(side="top", fill="x", padx=20)
         options_frame.pack(fill="both", expand=True, padx=15)
-        bottom_frame.pack(fill="x", padx=20)
+        bottom_frame.pack(fill="x", padx=40)
 
     # Reset quiz UI
     def reset_quiz(self):
@@ -861,7 +862,7 @@ class edit_quiz_frame(tk.Frame):
             )
         self.correct_label = tk.Label(
             self, text="Correct option box:\n1, 2, 3 or 4",
-            **text_attributes, bg=style.BACKGROUND_COLOR
+            font=(style.DEFAULT_FONT, 16), bg=style.BACKGROUND_COLOR
         )
         self.option1_label = tk.Label(
             self, text="Option 1 box -",
@@ -885,10 +886,10 @@ class edit_quiz_frame(tk.Frame):
             command=lambda: self.submit_question()
         )
         edit_quiz_frame.next_button = tk.Button(
-            self, text="Next Question", **text_attributes
+            self, text="Next Question", font=(style.DEFAULT_FONT, 16)
         )
         edit_quiz_frame.previous_button = tk.Button(
-            self, text="Previous Question", **text_attributes,
+            self, text="Previous Question", font=(style.DEFAULT_FONT, 16),
             bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
             command=lambda: self.show_question(self.question_no-1)
         )
