@@ -403,7 +403,7 @@ class quiz_frame(tk.Frame):
         bottom_frame = tk.Frame(self, bg=style.BACKGROUND_COLOR)
         # Widget Setup
         quiz_frame.question_label = tk.Label(
-            master=top_frame, text="question", wraplength=1100,
+            master=top_frame, text="question", wraplength=900,
             font=(style.DEFAULT_FONT, 32), bg=style.BACKGROUND_COLOR
         )
         title_button = tk.Button(
