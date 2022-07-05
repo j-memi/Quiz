@@ -7,6 +7,7 @@ import tkinter as tk
 # Import search function from Regular Expressions
 from re import search
 
+# Imports constants used for styling the program from style.py
 import style
 
 
