@@ -9,6 +9,6 @@ Available quizzes:
 
 	Quiz On Capital Cities
 
-Quiz Editor WIP
+Users can create their own quizzes using the quiz editor
 
 Has only been tested with Windows 10 on python 3.10
