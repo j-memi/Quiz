@@ -402,6 +402,13 @@ class quiz_frame(tk.Frame):
         options_frame = tk.Frame(self, bg=style.BACKGROUND_COLOR)
         bottom_frame = tk.Frame(self, bg=style.BACKGROUND_COLOR)
         # Widget Setup
+        option_button_styling = {
+            "anchor": "center", "bd": "0",
+            "bg": f"{style.BLUE_BUTTON}",
+            "activebackground": f"{style.ACTIVE_BLUE}",
+            "disabledforeground": "black",
+            "font": f"{style.DEFAULT_FONT} 18"
+            }
         quiz_frame.question_label = tk.Label(
             master=top_frame, text="question", wraplength=900,
             font=(style.DEFAULT_FONT, 32), bg=style.BACKGROUND_COLOR
@@ -419,27 +426,19 @@ class quiz_frame(tk.Frame):
             command=lambda: quiz_frame.finish_quiz(self, controller)
         )
         quiz_frame.option1 = tk.Button(
-            master=options_frame, text="option1", anchor="center",
-            bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
-            font=(style.DEFAULT_FONT, 18),
+            options_frame, **option_button_styling,
             command=lambda: quiz_frame.check_answer(self, 0)
         )
         quiz_frame.option2 = tk.Button(
-            master=options_frame, text="option2", anchor="center",
-            bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
-            font=(style.DEFAULT_FONT, 18),
+            options_frame, **option_button_styling,
             command=lambda: quiz_frame.check_answer(self, 1)
         )
         quiz_frame.option3 = tk.Button(
-            master=options_frame, text="option3", anchor="center",
-            bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
-            font=(style.DEFAULT_FONT, 18),
+            options_frame, **option_button_styling,
             command=lambda: quiz_frame.check_answer(self, 2)
         )
         quiz_frame.option4 = tk.Button(
-            options_frame, text="option4", anchor="center",
-            bd=0, bg=style.BLUE_BUTTON, activebackground=style.ACTIVE_BLUE,
-            font=(style.DEFAULT_FONT, 18),
+            options_frame, **option_button_styling,
             command=lambda: quiz_frame.check_answer(self, 3)
         )
         quiz_frame.score_label = tk.Label(
